@@ -66,6 +66,15 @@
   .epRow.epDone { opacity: 0.55; }
   .epRow.epDone .epName { text-decoration: line-through; text-decoration-color: #e62429; }
   .epMeta { color: #8b90b0; font-size: 11px; margin-left: auto; text-align: right; }
+  .removeBtn {
+    background: transparent; border: none; color: #4c5178;
+    font-size: 20px; line-height: 1; padding: 6px 8px; flex-shrink: 0;
+  }
+  .removeBtn:hover { color: #e62429; }
+  #removedPanel { display: none; margin-top: 20px; padding: 12px 14px; border-radius: 8px; background: #171a2e; border: 1px solid #2b2f4d; }
+  #removedPanel h2 { font-size: 16px; letter-spacing: 0.05em; color: #8b90b0; margin-bottom: 8px; }
+  .removedRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1c2038; font-size: 13px; color: #8b90b0; }
+  .restoreBtn { background: transparent; color: #7ea6e0; border: 1px solid #3a3f63; border-radius: 5px; padding: 4px 10px; font-size: 12px; flex-shrink: 0; }
   .resetWrap { text-align: center; margin-top: 28px; }
   .resetWrap button { background: transparent; color: #8b90b0; border: 1px solid #3a3f63; border-radius: 6px; padding: 8px 18px; font-size: 13px; }
   @media (prefers-reduced-motion: reduce) { #barFill { transition: none; } }
@@ -89,6 +98,8 @@
 <main>
   <div id="logPanel"><h2 class="display">Hours per day</h2><div id="logBody"></div></div>
   <ol id="list"></ol>
+  <button class="ghostBtn" id="removedToggle" style="display:none"></button>
+  <div id="removedPanel"><h2 class="display">Removed from marathon</h2><div id="removedBody"></div></div>
   <div class="resetWrap"><button id="resetBtn">Reset all progress</button></div>
 </main>
 <script>
@@ -217,13 +228,24 @@ const UNITS = [];
 ITEMS.forEach((item) => {
   if (item.epStart) {
     for (let e = item.epStart; e <= item.epEnd; e++) {
-      UNITS.push({ key: epKey(item, e), mins: epMins(item, e), logTitle: item.title + " · Ep " + e });
+      UNITS.push({ key: epKey(item, e), mins: epMins(item, e), itemId: item.id, logTitle: item.title + " · Ep " + e });
     }
   } else {
-    UNITS.push({ key: String(item.id), mins: item.mins, logTitle: item.title });
+    UNITS.push({ key: String(item.id), mins: item.mins, itemId: item.id, logTitle: item.title });
   }
 });
 const TOTAL_MINS = UNITS.reduce((s, u) => s + u.mins, 0);
+
+const REMOVED_KEY = "mcu-marathon-removed-v1"; // array of removed item ids
+let removed = new Set();
+try {
+  const rawR = localStorage.getItem(REMOVED_KEY);
+  if (rawR) removed = new Set(JSON.parse(rawR));
+} catch (e) { removed = new Set(); }
+function persistRemoved() {
+  try { localStorage.setItem(REMOVED_KEY, JSON.stringify([...removed])); } catch (e) {}
+}
+let removedOpen = false;
 
 let watched = {};
 (function load() {
@@ -298,6 +320,7 @@ function buildList() {
     if (item.epStart) {
       inner += '<button class="expandBtn" data-open="' + item.id + '" aria-label="Show episodes">▾</button>';
     }
+    inner += '<button class="removeBtn" data-remove="' + item.id + '" aria-label="Remove ' + item.title.replace(/"/g, '') + ' from marathon">\u00d7</button>';
     inner += "</div>";
     if (item.epStart) {
       let eps = "";
@@ -339,6 +362,14 @@ function buildList() {
   });
 
   ol.addEventListener("click", (e) => {
+    const rm = e.target.closest("[data-remove]");
+    if (rm) {
+      e.preventDefault();
+      removed.add(Number(rm.getAttribute("data-remove")));
+      persistRemoved();
+      render();
+      return;
+    }
     const t = e.target.closest("[data-open]");
     if (!t) return;
     if (e.target.tagName === "INPUT") return;
@@ -352,24 +383,26 @@ function buildList() {
 }
 
 function render() {
-  const doneMins = UNITS.reduce((s, u) => s + (watched[u.key] ? u.mins : 0), 0);
-  const leftMins = TOTAL_MINS - doneMins;
-  const pctDone = (doneMins / TOTAL_MINS) * 100;
+  const active = UNITS.filter((u) => !removed.has(u.itemId));
+  const activeTotal = active.reduce((s, u) => s + u.mins, 0) || 1;
+  const doneMins = active.reduce((s, u) => s + (watched[u.key] ? u.mins : 0), 0);
+  const leftMins = activeTotal - doneMins;
+  const pctDone = (doneMins / activeTotal) * 100;
 
   document.getElementById("pctLeft").innerHTML = (100 - pctDone).toFixed(1) + "<small>% LEFT</small>";
   const bar = document.getElementById("barFill");
   bar.style.width = pctDone + "%";
   bar.parentElement.setAttribute("aria-valuenow", Math.round(pctDone));
 
-  const doneUnits = UNITS.filter((u) => watched[u.key]).length;
-  document.getElementById("statA").textContent = doneUnits + " / " + UNITS.length + " ticks · " + fmtHours(doneMins) + " banked";
+  const doneUnits = active.filter((u) => watched[u.key]).length;
+  document.getElementById("statA").textContent = doneUnits + " / " + active.length + " ticks · " + fmtHours(doneMins) + " banked";
   document.getElementById("statB").textContent = fmtHours(leftMins) + " remaining";
 
   const daysLeft = Math.max(1, Math.ceil((DEADLINE - new Date()) / 86400000));
   const perDayMins = leftMins / daysLeft;
 
   const byDay = {};
-  UNITS.forEach((u) => {
+  active.forEach((u) => {
     const k = watched[u.key];
     if (!k) return;
     if (!byDay[k]) byDay[k] = { mins: 0, titles: [] };
@@ -415,8 +448,24 @@ function render() {
     }).join("");
   }
 
+  const removedItems = ITEMS.filter((i) => removed.has(i.id));
+  const removedToggle = document.getElementById("removedToggle");
+  if (removedItems.length === 0) {
+    removedToggle.style.display = "none";
+    removedOpen = false;
+  } else {
+    removedToggle.style.display = "block";
+    removedToggle.textContent = (removedOpen ? "Hide removed \u25b2" : "Removed from marathon \u2014 " + removedItems.length + " \u25bc");
+  }
+  document.getElementById("removedPanel").style.display = removedOpen && removedItems.length ? "block" : "none";
+  document.getElementById("removedBody").innerHTML = removedItems.map((i) =>
+    '<div class="removedRow"><span>' + i.title + " \u00b7 " + fmtHours(i.mins) +
+    '</span><button class="restoreBtn" data-restore="' + i.id + '">Restore</button></div>'
+  ).join("");
+
   ITEMS.forEach((item) => {
     const li = document.getElementById("item-" + item.id);
+    li.style.display = removed.has(item.id) ? "none" : "";
     const master = li.querySelector('input[data-item]');
     const meta = li.querySelector(".itemMeta");
     if (item.epStart) {
@@ -443,10 +492,20 @@ function render() {
 }
 
 document.getElementById("logToggle").addEventListener("click", () => { logOpen = !logOpen; render(); });
+document.getElementById("removedToggle").addEventListener("click", () => { removedOpen = !removedOpen; render(); });
+document.getElementById("removedPanel").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-restore]");
+  if (!b) return;
+  removed.delete(Number(b.getAttribute("data-restore")));
+  persistRemoved();
+  render();
+});
 document.getElementById("resetBtn").addEventListener("click", () => {
   if (!confirm("Wipe all ticks and the watch log, and start from zero?")) return;
   watched = {};
+  removed = new Set();
   persist();
+  persistRemoved();
   render();
 });
 
