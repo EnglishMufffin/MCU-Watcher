@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101322">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MCU Marathon — Road to 18 Dec</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: #101322 radial-gradient(ellipse 80% 50% at 50% -10%, rgba(230,36,41,0.18), transparent);
+    color: #f5f2ea;
+    font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+    padding-bottom: 80px;
+  }
+  .display { font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; font-weight: 400; letter-spacing: 0.03em; text-transform: uppercase; }
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(16,19,34,0.96);
+    backdrop-filter: blur(6px);
+    border-bottom: 3px solid #e62429;
+    padding: calc(env(safe-area-inset-top) + 14px) 16px 14px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .headrow { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: clamp(22px, 5vw, 34px); }
+  h1 .red { color: #e62429; }
+  #pctLeft { font-size: clamp(22px, 5vw, 34px); color: #f0b429; }
+  #pctLeft small { font-size: 0.55em; }
+  .barOuter { margin-top: 10px; height: 18px; border-radius: 4px; overflow: hidden; background: #232742; border: 1px solid #3a3f63; }
+  #barFill { height: 100%; width: 0%; background: linear-gradient(90deg, #e62429, #f0b429); transition: width 300ms ease; }
+  .stats { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 8px; font-size: 13px; color: #aeb3cf; }
+  .pace { margin-top: 10px; padding: 8px 12px; border-radius: 6px; background: #1c2038; border: 1px solid #3a3f63; font-size: 14px; line-height: 1.45; }
+  .pace.done { background: #1e3a25; border-color: #3f7a4f; }
+  .gold { color: #f0b429; font-weight: 700; }
+  .green { color: #7fd98f; }
+  button { font-family: inherit; cursor: pointer; }
+  .ghostBtn {
+    margin-top: 8px; width: 100%;
+    background: transparent; color: #aeb3cf;
+    border: 1px solid #3a3f63; border-radius: 6px;
+    padding: 7px 12px; font-size: 13px;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 16px 12px 0; }
+  #logPanel { display: none; margin-bottom: 20px; padding: 12px 14px; border-radius: 8px; background: #171a2e; border: 1px solid #2b2f4d; }
+  #logPanel h2 { font-size: 18px; letter-spacing: 0.05em; color: #f0b429; margin-bottom: 10px; }
+  .dayRow { margin-bottom: 10px; }
+  .dayHead { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 3px; }
+  .dayBarOuter { height: 8px; border-radius: 3px; background: #232742; overflow: hidden; }
+  .dayBarFill { height: 100%; background: linear-gradient(90deg, #e62429, #f0b429); }
+  .dayBarFill.ok { background: linear-gradient(90deg, #3f7a4f, #7fd98f); }
+  .dayTitles { font-size: 11px; color: #6c7194; margin-top: 2px; }
+  ol { list-style: none; }
+  li label {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px; cursor: pointer;
+    border-bottom: 1px solid #232742;
+    transition: opacity 150ms ease, background 150ms ease;
+  }
+  li.done label { background: rgba(230,36,41,0.06); opacity: 0.55; }
+  li.done .title { text-decoration: line-through; text-decoration-color: #e62429; }
+  input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; accent-color: #e62429; cursor: pointer; }
+  .num { width: 26px; text-align: right; flex-shrink: 0; color: #4c5178; font-size: 14px; }
+  .title { display: block; font-size: 15px; font-weight: 600; }
+  .meta { font-size: 12px; color: #8b90b0; }
+  .meta .tag { font-weight: 700; letter-spacing: 0.06em; }
+  .tag.Film { color: #f0b429; } .tag.TV { color: #7ea6e0; } .tag.Special { color: #c78bdb; }
+  .resetWrap { text-align: center; margin-top: 28px; }
+  .resetWrap button { background: transparent; color: #8b90b0; border: 1px solid #3a3f63; border-radius: 6px; padding: 8px 18px; font-size: 13px; }
+  @media (prefers-reduced-motion: reduce) { #barFill, li label { transition: none; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="headrow">
+      <h1 class="display">Road to <span class="red">18 Dec</span></h1>
+      <div id="pctLeft" class="display">100.0<small>% LEFT</small></div>
+    </div>
+    <div class="barOuter" role="progressbar" aria-label="Marathon progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div id="barFill"></div>
+    </div>
+    <div class="stats">
+      <span id="statLeftSideA"></span>
+      <span id="statLeftSideB"></span>
+    </div>
+    <div class="pace" id="paceBox"></div>
+    <button class="ghostBtn" id="logToggle">Watch log ▼</button>
+  </div>
+</header>
+
+<main>
+  <div id="logPanel">
+    <h2 class="display">Hours per day</h2>
+    <div id="logBody"></div>
+  </div>
+  <ol id="list"></ol>
+  <div class="resetWrap"><button id="resetBtn">Reset all progress</button></div>
+</main>
+
+<script>
+const ITEMS = [
+  { id: 1, title: "Eyes of Wakanda", type: "TV", mins: 105 },
+  { id: 2, title: "Captain America: The First Avenger", type: "Film", mins: 124 },
+  { id: 3, title: "Agent Carter — Season 1", type: "TV", mins: 336 },
+  { id: 4, title: "Agent Carter — Season 2", type: "TV", mins: 420 },
+  { id: 5, title: "Captain Marvel", type: "Film", mins: 123 },
+  { id: 6, title: "Iron Man", type: "Film", mins: 126 },
+  { id: 7, title: "Iron Man 2", type: "Film", mins: 124 },
+  { id: 8, title: "The Incredible Hulk", type: "Film", mins: 112 },
+  { id: 9, title: "Thor", type: "Film", mins: 115 },
+  { id: 10, title: "The Avengers", type: "Film", mins: 143 },
+  { id: 11, title: "Agents of S.H.I.E.L.D. — S1, eps 1–7", type: "TV", mins: 301 },
+  { id: 12, title: "Thor: The Dark World", type: "Film", mins: 112 },
+  { id: 13, title: "Agents of S.H.I.E.L.D. — S1, eps 8–16", type: "TV", mins: 387 },
+  { id: 14, title: "Iron Man 3", type: "Film", mins: 130 },
+  { id: 15, title: "Captain America: The Winter Soldier", type: "Film", mins: 136 },
+  { id: 16, title: "Agents of S.H.I.E.L.D. — S1, eps 17–22", type: "TV", mins: 258 },
+  { id: 17, title: "Guardians of the Galaxy", type: "Film", mins: 121 },
+  { id: 18, title: "Guardians of the Galaxy Vol. 2", type: "Film", mins: 136 },
+  { id: 19, title: "Daredevil — Season 1", type: "TV", mins: 711 },
+  { id: 20, title: "Agents of S.H.I.E.L.D. — S2, eps 1–10", type: "TV", mins: 430 },
+  { id: 21, title: "Jessica Jones — Season 1", type: "TV", mins: 676 },
+  { id: 22, title: "Agents of S.H.I.E.L.D. — S2, eps 11–19", type: "TV", mins: 387 },
+  { id: 23, title: "Avengers: Age of Ultron", type: "Film", mins: 141 },
+  { id: 24, title: "Agents of S.H.I.E.L.D. — S2, eps 20–22", type: "TV", mins: 129 },
+  { id: 25, title: "Daredevil — S2, eps 1–4", type: "TV", mins: 218 },
+  { id: 26, title: "Luke Cage — S1, eps 1–4", type: "TV", mins: 220 },
+  { id: 27, title: "Daredevil — S2, eps 5–11", type: "TV", mins: 382 },
+  { id: 28, title: "Luke Cage — S1, eps 5–8", type: "TV", mins: 220 },
+  { id: 29, title: "Daredevil — S2, eps 12–13", type: "TV", mins: 109 },
+  { id: 30, title: "Luke Cage — S1, eps 9–13", type: "TV", mins: 275 },
+  { id: 31, title: "Ant-Man", type: "Film", mins: 117 },
+  { id: 32, title: "Agents of S.H.I.E.L.D. — S3, eps 1–10", type: "TV", mins: 430 },
+  { id: 33, title: "Agents of S.H.I.E.L.D. — S3, eps 11–19", type: "TV", mins: 387 },
+  { id: 34, title: "Iron Fist — Season 1", type: "TV", mins: 715 },
+  { id: 35, title: "Captain America: Civil War", type: "Film", mins: 147 },
+  { id: 36, title: "Black Widow", type: "Film", mins: 134 },
+  { id: 37, title: "Agents of S.H.I.E.L.D. — S3, eps 20–22", type: "TV", mins: 129 },
+  { id: 38, title: "The Defenders", type: "TV", mins: 384 },
+  { id: 39, title: "Agents of S.H.I.E.L.D. — S4, eps 1–6", type: "TV", mins: 258 },
+  { id: 40, title: "Doctor Strange", type: "Film", mins: 115 },
+  { id: 41, title: "Black Panther", type: "Film", mins: 134 },
+  { id: 42, title: "Agents of S.H.I.E.L.D. — S4, eps 7–8", type: "TV", mins: 86 },
+  { id: 43, title: "Agents of S.H.I.E.L.D. — S4, eps 9–22", type: "TV", mins: 602 },
+  { id: 44, title: "Spider-Man: Homecoming", type: "Film", mins: 133 },
+  { id: 45, title: "Thor: Ragnarok", type: "Film", mins: 130 },
+  { id: 46, title: "Inhumans", type: "TV", mins: 344 },
+  { id: 47, title: "The Punisher — Season 1", type: "TV", mins: 715 },
+  { id: 48, title: "Runaways — Season 1", type: "TV", mins: 450 },
+  { id: 49, title: "Agents of S.H.I.E.L.D. — S5, eps 1–10", type: "TV", mins: 430 },
+  { id: 50, title: "Jessica Jones — Season 2", type: "TV", mins: 689 },
+  { id: 51, title: "Agents of S.H.I.E.L.D. — S5, eps 11–18", type: "TV", mins: 344 },
+  { id: 52, title: "Cloak & Dagger — Season 1", type: "TV", mins: 420 },
+  { id: 53, title: "Cloak & Dagger — Season 2", type: "TV", mins: 420 },
+  { id: 54, title: "Luke Cage — Season 2", type: "TV", mins: 715 },
+  { id: 55, title: "Iron Fist — Season 2", type: "TV", mins: 480 },
+  { id: 56, title: "Daredevil — Season 3", type: "TV", mins: 663 },
+  { id: 57, title: "Runaways — Season 2", type: "TV", mins: 585 },
+  { id: 58, title: "The Punisher — Season 2", type: "TV", mins: 689 },
+  { id: 59, title: "Jessica Jones — Season 3", type: "TV", mins: 676 },
+  { id: 60, title: "Ant-Man and the Wasp", type: "Film", mins: 118 },
+  { id: 61, title: "Avengers: Infinity War", type: "Film", mins: 149 },
+  { id: 62, title: "Agents of S.H.I.E.L.D. — S5, eps 19–22", type: "TV", mins: 172 },
+  { id: 63, title: "Agents of S.H.I.E.L.D. — Season 6", type: "TV", mins: 559 },
+  { id: 64, title: "Agents of S.H.I.E.L.D. — Season 7", type: "TV", mins: 559 },
+  { id: 65, title: "Runaways — Season 3", type: "TV", mins: 450 },
+  { id: 66, title: "Avengers: Endgame", type: "Film", mins: 181 },
+  { id: 67, title: "Loki — Season 1", type: "TV", mins: 290 },
+  { id: 68, title: "Loki — Season 2", type: "TV", mins: 290 },
+  { id: 69, title: "Marvel Zombies", type: "TV", mins: 132 },
+  { id: 70, title: "WandaVision", type: "TV", mins: 350 },
+  { id: 71, title: "Deadpool & Wolverine", type: "Film", mins: 128 },
+  { id: 72, title: "Shang-Chi and the Legend of the Ten Rings", type: "Film", mins: 132 },
+  { id: 73, title: "The Falcon and the Winter Soldier", type: "TV", mins: 305 },
+  { id: 74, title: "Eternals", type: "Film", mins: 156 },
+  { id: 75, title: "Spider-Man: Far From Home", type: "Film", mins: 129 },
+  { id: 76, title: "Spider-Man: No Way Home", type: "Film", mins: 148 },
+  { id: 77, title: "Doctor Strange in the Multiverse of Madness", type: "Film", mins: 126 },
+  { id: 78, title: "Hawkeye", type: "TV", mins: 285 },
+  { id: 79, title: "Moon Knight", type: "TV", mins: 285 },
+  { id: 80, title: "Black Panther: Wakanda Forever", type: "Film", mins: 161 },
+  { id: 81, title: "Echo", type: "TV", mins: 200 },
+  { id: 82, title: "She-Hulk: Attorney at Law", type: "TV", mins: 290 },
+  { id: 83, title: "Ms. Marvel", type: "TV", mins: 270 },
+  { id: 84, title: "Thor: Love and Thunder", type: "Film", mins: 118 },
+  { id: 85, title: "Ironheart", type: "TV", mins: 270 },
+  { id: 86, title: "Werewolf by Night", type: "Special", mins: 53 },
+  { id: 87, title: "The Guardians of the Galaxy Holiday Special", type: "Special", mins: 44 },
+  { id: 88, title: "Ant-Man and The Wasp: Quantumania", type: "Film", mins: 124 },
+  { id: 89, title: "Guardians of the Galaxy Vol. 3", type: "Film", mins: 150 },
+  { id: 90, title: "Secret Invasion", type: "TV", mins: 280 },
+  { id: 91, title: "The Marvels", type: "Film", mins: 105 },
+  { id: 92, title: "Agatha All Along", type: "TV", mins: 340 },
+  { id: 93, title: "Daredevil: Born Again — Season 1", type: "TV", mins: 426 },
+  { id: 94, title: "Captain America: Brave New World", type: "Film", mins: 118 },
+  { id: 95, title: "Thunderbolts*", type: "Film", mins: 126 },
+  { id: 96, title: "The Fantastic Four: First Steps", type: "Film", mins: 115 },
+  { id: 97, title: "Wonder Man", type: "TV", mins: 248 },
+  { id: 98, title: "Daredevil: Born Again — Season 2", type: "TV", mins: 389 },
+  { id: 99, title: "The Punisher: One Last Kill", type: "Special", mins: 48 },
+  { id: 100, title: "Spider-Man: Brand New Day", type: "Film", mins: 145 },
+];
+
+const TOTAL_MINS = ITEMS.reduce((s, i) => s + i.mins, 0);
+const STORAGE_KEY = "mcu-marathon-log-v1"; // { [id]: "YYYY-MM-DD" }
+const DEADLINE = new Date(2026, 11, 18, 23, 59, 59); // 18 Dec 2026
+
+let watched = {};
+try {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) watched = JSON.parse(raw) || {};
+} catch (e) { watched = {}; }
+
+function persist() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(watched)); }
+  catch (e) { /* storage full or blocked; app still works for this session */ }
+}
+
+const fmtHours = (mins) => {
+  const h = Math.floor(mins / 60);
+  const m = Math.round(mins % 60);
+  return h + "h " + String(m).padStart(2, "0") + "m";
+};
+const todayKey = () => {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+};
+const fmtDate = (key) => {
+  const [y, mo, da] = key.split("-").map(Number);
+  return new Date(y, mo - 1, da).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+};
+
+function render() {
+  const watchedItems = ITEMS.filter((i) => watched[i.id]);
+  const doneMins = watchedItems.reduce((s, i) => s + i.mins, 0);
+  const leftMins = TOTAL_MINS - doneMins;
+  const pctDone = (doneMins / TOTAL_MINS) * 100;
+
+  document.getElementById("pctLeft").innerHTML =
+    (100 - pctDone).toFixed(1) + "<small>% LEFT</small>";
+  const bar = document.getElementById("barFill");
+  bar.style.width = pctDone + "%";
+  bar.parentElement.setAttribute("aria-valuenow", Math.round(pctDone));
+
+  document.getElementById("statLeftSideA").textContent =
+    watchedItems.length + " / " + ITEMS.length + " watched · " + fmtHours(doneMins) + " banked";
+  document.getElementById("statLeftSideB").textContent = fmtHours(leftMins) + " remaining";
+
+  const daysLeft = Math.max(1, Math.ceil((DEADLINE - new Date()) / 86400000));
+  const perDayMins = leftMins / daysLeft;
+
+  // daily log
+  const byDay = {};
+  watchedItems.forEach((i) => {
+    const k = watched[i.id];
+    if (!byDay[k]) byDay[k] = { mins: 0, titles: [] };
+    byDay[k].mins += i.mins;
+    byDay[k].titles.push(i.title);
+  });
+  const dayKeys = Object.keys(byDay).sort().reverse();
+  const maxDay = Math.max(1, ...dayKeys.map((k) => byDay[k].mins));
+  const todayMins = byDay[todayKey()] ? byDay[todayKey()].mins : 0;
+
+  const paceBox = document.getElementById("paceBox");
+  if (leftMins === 0) {
+    paceBox.className = "pace done";
+    paceBox.innerHTML = '<strong class="green">Marathon complete. Go outside. 🏆</strong>';
+  } else {
+    paceBox.className = "pace";
+    paceBox.innerHTML =
+      '<span class="gold">' + fmtHours(perDayMins) + "/day</span> needed over the next <strong>" +
+      daysLeft + " days</strong> · today: <strong class=\"" +
+      (todayMins >= perDayMins ? "green" : "") + '\">' + fmtHours(todayMins) + "</strong>" +
+      (todayMins >= perDayMins ? " ✓ on pace" : "");
+  }
+
+  document.getElementById("logToggle").textContent =
+    (logOpen ? "Hide watch log ▲" : "Watch log — " + dayKeys.length + " day" + (dayKeys.length === 1 ? "" : "s") + " ▼");
+
+  const logBody = document.getElementById("logBody");
+  if (dayKeys.length === 0) {
+    logBody.innerHTML = '<div style="font-size:13px;color:#8b90b0">Nothing logged yet — tick something off and it\'ll appear here with today\'s date.</div>';
+  } else {
+    logBody.innerHTML = dayKeys.map((k) => {
+      const d = byDay[k];
+      const ok = d.mins >= perDayMins && leftMins > 0;
+      return '<div class="dayRow">' +
+        '<div class="dayHead"><strong>' + fmtDate(k) + "</strong><span" +
+        (ok ? ' class="green"' : "") + ">" + fmtHours(d.mins) + " · " + d.titles.length +
+        " item" + (d.titles.length === 1 ? "" : "s") + "</span></div>" +
+        '<div class="dayBarOuter"><div class="dayBarFill' + (ok ? " ok" : "") +
+        '" style="width:' + (d.mins / maxDay) * 100 + '%"></div></div>' +
+        '<div class="dayTitles">' + d.titles.join(" · ") + "</div></div>";
+    }).join("");
+  }
+
+  // list rows: update state only (rows built once)
+  ITEMS.forEach((item) => {
+    const li = document.getElementById("item-" + item.id);
+    const isDone = !!watched[item.id];
+    li.className = isDone ? "done" : "";
+    li.querySelector("input").checked = isDone;
+    li.querySelector(".when").textContent = isDone ? " · watched " + fmtDate(watched[item.id]) : "";
+  });
+}
+
+function buildList() {
+  const ol = document.getElementById("list");
+  ol.innerHTML = ITEMS.map((item, idx) =>
+    '<li id="item-' + item.id + '"><label>' +
+    '<input type="checkbox" data-id="' + item.id + '">' +
+    '<span class="num display">' + (idx + 1) + "</span>" +
+    '<span style="flex:1;min-width:0">' +
+    '<span class="title">' + item.title + "</span>" +
+    '<span class="meta"><span class="tag ' + item.type + '">' + item.type.toUpperCase() +
+    "</span> · " + fmtHours(item.mins) + '<span class="when green"></span></span>' +
+    "</span></label></li>"
+  ).join("");
+  ol.addEventListener("change", (e) => {
+    const id = e.target.getAttribute("data-id");
+    if (!id) return;
+    if (watched[id]) delete watched[id];
+    else watched[id] = todayKey();
+    persist();
+    render();
+  });
+}
+
+let logOpen = false;
+document.getElementById("logToggle").addEventListener("click", () => {
+  logOpen = !logOpen;
+  document.getElementById("logPanel").style.display = logOpen ? "block" : "none";
+  render();
+});
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (!confirm("Wipe all ticks and the watch log, and start from zero?")) return;
+  watched = {};
+  persist();
+  render();
+});
+
+buildList();
+render();
+</script>
+</body>
+</html>
