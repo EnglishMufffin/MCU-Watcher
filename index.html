@@ -66,6 +66,18 @@
   .epRow.epDone { opacity: 0.55; }
   .epRow.epDone .epName { text-decoration: line-through; text-decoration-color: #e62429; }
   .epMeta { color: #8b90b0; font-size: 11px; margin-left: auto; text-align: right; }
+  .headerBtns { display: flex; gap: 8px; }
+  .headerBtns .ghostBtn { margin-top: 8px; }
+  #lockBtn { flex: 0 0 auto; width: auto; padding: 7px 14px; }
+  #lockBtn.unlocked { color: #f0b429; border-color: #f0b429; }
+  .dragHandle {
+    display: none; flex-shrink: 0; color: #4c5178; font-size: 18px;
+    padding: 6px 4px; cursor: grab; touch-action: none; user-select: none;
+  }
+  body.unlocked .dragHandle { display: block; }
+  body.unlocked .removeBtn { display: none; }
+  li.dragging { opacity: 0.9; }
+  li.dragging > .row { background: #232742; outline: 2px solid #f0b429; border-radius: 6px; }
   .removeBtn {
     background: transparent; border: none; color: #4c5178;
     font-size: 20px; line-height: 1; padding: 6px 8px; flex-shrink: 0;
@@ -75,6 +87,18 @@
   #removedPanel h2 { font-size: 16px; letter-spacing: 0.05em; color: #8b90b0; margin-bottom: 8px; }
   .removedRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1c2038; font-size: 13px; color: #8b90b0; }
   .restoreBtn { background: transparent; color: #7ea6e0; border: 1px solid #3a3f63; border-radius: 5px; padding: 4px 10px; font-size: 12px; flex-shrink: 0; }
+  #addPanel { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 8px; background: #171a2e; border: 1px solid #2b2f4d; }
+  #addPanel label { display: block; font-size: 12px; color: #8b90b0; margin: 8px 0 3px; }
+  #addPanel input, #addPanel select {
+    width: 100%; padding: 8px 10px; border-radius: 6px;
+    background: #101322; border: 1px solid #3a3f63; color: #f5f2ea;
+    font-family: inherit; font-size: 14px;
+  }
+  .addBtns { display: flex; gap: 8px; margin-top: 12px; }
+  .addBtns button { flex: 1; padding: 8px; border-radius: 6px; font-size: 13px; }
+  #addSave { background: #e62429; border: none; color: #fff; font-weight: 700; }
+  #addCancel { background: transparent; border: 1px solid #3a3f63; color: #8b90b0; }
+  #addErr { color: #f08c8c; font-size: 12px; margin-top: 6px; display: none; }
   .resetWrap { text-align: center; margin-top: 28px; }
   .resetWrap button { background: transparent; color: #8b90b0; border: 1px solid #3a3f63; border-radius: 6px; padding: 8px 18px; font-size: 13px; }
   @media (prefers-reduced-motion: reduce) { #barFill { transition: none; } }
@@ -92,12 +116,37 @@
     </div>
     <div class="stats"><span id="statA"></span><span id="statB"></span></div>
     <div class="pace" id="paceBox"></div>
-    <button class="ghostBtn" id="logToggle">Watch log ▼</button>
+    <div class="headerBtns">
+      <button class="ghostBtn" id="logToggle" style="flex:1">Watch log ▼</button>
+      <button class="ghostBtn" id="lockBtn" aria-label="Unlock to reorder the list">🔒</button>
+    </div>
   </div>
 </header>
 <main>
   <div id="logPanel"><h2 class="display">Hours per day</h2><div id="logBody"></div></div>
   <ol id="list"></ol>
+  <button class="ghostBtn" id="addToggle">＋ Add a film or show</button>
+  <div id="addPanel">
+    <label for="addTitle">Title</label>
+    <input id="addTitle" type="text" placeholder="e.g. Logan" maxlength="80">
+    <label for="addType">Type</label>
+    <select id="addType">
+      <option value="Film">Film</option>
+      <option value="TV">TV (with episodes)</option>
+      <option value="Special">Special</option>
+    </select>
+    <label for="addMins">Total runtime (minutes)</label>
+    <input id="addMins" type="number" min="1" max="6000" placeholder="e.g. 137">
+    <div id="addEpsWrap" style="display:none">
+      <label for="addEps">Number of episodes</label>
+      <input id="addEps" type="number" min="1" max="60" placeholder="e.g. 8">
+    </div>
+    <div id="addErr"></div>
+    <div class="addBtns">
+      <button id="addSave">Add to marathon</button>
+      <button id="addCancel">Cancel</button>
+    </div>
+  </div>
   <button class="ghostBtn" id="removedToggle" style="display:none"></button>
   <div id="removedPanel"><h2 class="display">Removed from marathon</h2><div id="removedBody"></div></div>
   <div class="resetWrap"><button id="resetBtn">Reset all progress</button></div>
@@ -224,7 +273,9 @@ function epKey(item, epNum) { return item.id + ":" + epNum; }
 function epLabel(item, epNum) { return "Ep " + epNum; }
 
 // Every tickable unit: films/specials = 1 unit; TV = 1 unit per episode.
-const UNITS = [];
+let UNITS = [];
+function rebuildUnits() {
+UNITS = [];
 ITEMS.forEach((item) => {
   if (item.epStart) {
     for (let e = item.epStart; e <= item.epEnd; e++) {
@@ -234,7 +285,8 @@ ITEMS.forEach((item) => {
     UNITS.push({ key: String(item.id), mins: item.mins, itemId: item.id, logTitle: item.title });
   }
 });
-const TOTAL_MINS = UNITS.reduce((s, u) => s + u.mins, 0);
+}
+rebuildUnits();
 
 const REMOVED_KEY = "mcu-marathon-removed-v1"; // array of removed item ids
 let removed = new Set();
@@ -290,6 +342,37 @@ const fmtDate = (key) => {
   return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 };
 
+const CUSTOM_KEY = "mcu-marathon-custom-v1"; // array of user-added items (ids >= 1001)
+let customs = [];
+try {
+  const rawC = localStorage.getItem(CUSTOM_KEY);
+  if (rawC) customs = JSON.parse(rawC) || [];
+} catch (e) { customs = []; }
+customs.forEach((c) => ITEMS.push(c));
+function persistCustoms() {
+  try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(customs)); } catch (e) {}
+}
+
+const ORDER_KEY = "mcu-marathon-order-v1"; // array of item ids, custom order
+try {
+  const rawO = localStorage.getItem(ORDER_KEY);
+  if (rawO) {
+    const saved = JSON.parse(rawO);
+    const pos = {};
+    saved.forEach((id, i) => { pos[id] = i; });
+    // items not in the saved order (newly added) keep their default neighbourhood
+    ITEMS.sort((a, b) => {
+      const pa = (pos[a.id] !== undefined) ? pos[a.id] : ITEMS.indexOf(a) - 0.5;
+      const pb = (pos[b.id] !== undefined) ? pos[b.id] : ITEMS.indexOf(b) - 0.5;
+      return pa - pb;
+    });
+  }
+} catch (e) {}
+function persistOrder() {
+  try { localStorage.setItem(ORDER_KEY, JSON.stringify(ITEMS.map((i) => i.id))); } catch (e) {}
+}
+let unlocked = false;
+
 const openItems = new Set();
 let logOpen = false;
 
@@ -305,13 +388,14 @@ function itemDoneEps(item) {
   return c;
 }
 
-function buildList() {
+function buildRows() {
   const ol = document.getElementById("list");
   ol.innerHTML = ITEMS.map((item, idx) => {
     let inner =
       '<div class="row">' +
+      '<span class="dragHandle" data-drag="' + item.id + '" aria-hidden="true">\u2261</span>' +
       '<input type="checkbox" data-item="' + item.id + '" aria-label="Mark all of ' + item.title + '">' +
-      '<span class="num display">' + (idx + 1) + "</span>" +
+      '<span class="num display"></span>' +
       '<span style="flex:1;min-width:0" data-open="' + item.id + '">' +
       '<span class="title">' + item.title + "</span>" +
       '<span class="meta"><span class="tag ' + item.type + '">' + item.type.toUpperCase() +
@@ -336,6 +420,11 @@ function buildList() {
     }
     return '<li id="item-' + item.id + '">' + inner + "</li>";
   }).join("");
+}
+
+function buildList() {
+  const ol = document.getElementById("list");
+  buildRows();
 
   ol.addEventListener("change", (e) => {
     const epK = e.target.getAttribute("data-ep");
@@ -459,9 +548,18 @@ function render() {
   }
   document.getElementById("removedPanel").style.display = removedOpen && removedItems.length ? "block" : "none";
   document.getElementById("removedBody").innerHTML = removedItems.map((i) =>
-    '<div class="removedRow"><span>' + i.title + " \u00b7 " + fmtHours(i.mins) +
-    '</span><button class="restoreBtn" data-restore="' + i.id + '">Restore</button></div>'
+    '<div class="removedRow"><span>' + i.title + " · " + fmtHours(i.mins) +
+    '</span><span style="display:flex;gap:6px"><button class="restoreBtn" data-restore="' + i.id + '">Restore</button>' +
+    (i.id >= 1001 ? '<button class="restoreBtn" style="color:#f08c8c;border-color:#5a3a3a" data-delete-custom="' + i.id + '">Delete</button>' : "") +
+    "</span></div>"
   ).join("");
+
+  // renumber visible rows in current DOM order
+  let n = 0;
+  Array.from(document.getElementById("list").children).forEach((li) => {
+    const id = Number(li.id.replace("item-", ""));
+    if (!removed.has(id)) { n++; li.querySelector(".num").textContent = n; }
+  });
 
   ITEMS.forEach((item) => {
     const li = document.getElementById("item-" + item.id);
@@ -492,8 +590,132 @@ function render() {
 }
 
 document.getElementById("logToggle").addEventListener("click", () => { logOpen = !logOpen; render(); });
+// ---- add custom films/shows ----
+const addPanel = document.getElementById("addPanel");
+document.getElementById("addToggle").addEventListener("click", () => {
+  addPanel.style.display = addPanel.style.display === "block" ? "none" : "block";
+});
+document.getElementById("addType").addEventListener("change", (e) => {
+  document.getElementById("addEpsWrap").style.display = e.target.value === "TV" ? "block" : "none";
+});
+document.getElementById("addCancel").addEventListener("click", () => { addPanel.style.display = "none"; });
+document.getElementById("addSave").addEventListener("click", () => {
+  const title = document.getElementById("addTitle").value.trim();
+  const type = document.getElementById("addType").value;
+  const mins = parseInt(document.getElementById("addMins").value, 10);
+  const eps = parseInt(document.getElementById("addEps").value, 10);
+  const err = document.getElementById("addErr");
+  const fail = (msg) => { err.textContent = msg; err.style.display = "block"; };
+  err.style.display = "none";
+  if (!title) return fail("Give it a title.");
+  if (!mins || mins < 1) return fail("Enter the total runtime in minutes.");
+  if (type === "TV" && (!eps || eps < 1)) return fail("Enter how many episodes it has.");
+  const safe = title.replace(/</g, "\u2039").replace(/>/g, "\u203a").replace(/"/g, "\u2033");
+  const id = Math.max(1000, ...customs.map((c) => c.id)) + 1;
+  const item = { id: id, title: safe, type: type, mins: mins };
+  if (type === "TV") { item.epStart = 1; item.epEnd = eps; }
+  customs.push(item);
+  ITEMS.push(item);
+  persistCustoms();
+  persistOrder();
+  rebuildUnits();
+  buildRows();
+  render();
+  document.getElementById("addTitle").value = "";
+  document.getElementById("addMins").value = "";
+  document.getElementById("addEps").value = "";
+  addPanel.style.display = "none";
+  document.getElementById("item-" + id).scrollIntoView({ block: "center" });
+});
+
+const lockBtn = document.getElementById("lockBtn");
+lockBtn.addEventListener("click", () => {
+  unlocked = !unlocked;
+  document.body.classList.toggle("unlocked", unlocked);
+  lockBtn.classList.toggle("unlocked", unlocked);
+  lockBtn.textContent = unlocked ? "🔓" : "🔒";
+  lockBtn.setAttribute("aria-label", unlocked ? "Lock the list order" : "Unlock to reorder the list");
+  if (!unlocked) { persistOrder(); }
+});
+
+// ---- drag to reorder (only via the ≡ handle, only when unlocked) ----
+(function enableDrag() {
+  const listEl = document.getElementById("list");
+  let dragLi = null;
+  let scrollTimer = null;
+
+  function autoScroll(y) {
+    const edge = 110;
+    let dy = 0;
+    if (y < edge) dy = -12;
+    else if (y > window.innerHeight - edge) dy = 12;
+    if (dy !== 0 && scrollTimer === null) {
+      scrollTimer = setInterval(() => window.scrollBy(0, dy), 16);
+    } else if (dy === 0 && scrollTimer !== null) {
+      clearInterval(scrollTimer); scrollTimer = null;
+    }
+  }
+
+  listEl.addEventListener("pointerdown", (e) => {
+    if (!unlocked) return;
+    const handle = e.target.closest(".dragHandle");
+    if (!handle) return;
+    e.preventDefault();
+    dragLi = handle.closest("li");
+    dragLi.classList.add("dragging");
+    handle.setPointerCapture(e.pointerId);
+  });
+
+  listEl.addEventListener("pointermove", (e) => {
+    if (!dragLi) return;
+    e.preventDefault();
+    autoScroll(e.clientY);
+    const siblings = Array.from(listEl.children).filter(
+      (li) => li !== dragLi && li.style.display !== "none"
+    );
+    for (const sib of siblings) {
+      const r = sib.getBoundingClientRect();
+      if (e.clientY < r.top + r.height / 2) {
+        if (sib.previousElementSibling !== dragLi) listEl.insertBefore(dragLi, sib);
+        return;
+      }
+    }
+    if (listEl.lastElementChild !== dragLi) listEl.appendChild(dragLi);
+  });
+
+  function endDrag() {
+    if (!dragLi) return;
+    dragLi.classList.remove("dragging");
+    dragLi = null;
+    if (scrollTimer !== null) { clearInterval(scrollTimer); scrollTimer = null; }
+    // rebuild ITEMS order from DOM, persist, re-render numbering
+    const byId = {};
+    ITEMS.forEach((i) => { byId[i.id] = i; });
+    const newOrder = Array.from(listEl.children).map((li) => byId[Number(li.id.replace("item-", ""))]);
+    ITEMS.length = 0;
+    newOrder.forEach((i) => ITEMS.push(i));
+    persistOrder();
+    render();
+  }
+  listEl.addEventListener("pointerup", endDrag);
+  listEl.addEventListener("pointercancel", endDrag);
+})();
+
 document.getElementById("removedToggle").addEventListener("click", () => { removedOpen = !removedOpen; render(); });
 document.getElementById("removedPanel").addEventListener("click", (e) => {
+  const del = e.target.closest("[data-delete-custom]");
+  if (del) {
+    const id = Number(del.getAttribute("data-delete-custom"));
+    if (!confirm("Delete this custom entry for good?")) return;
+    customs = customs.filter((c) => c.id !== id);
+    const ix = ITEMS.findIndex((i) => i.id === id);
+    if (ix >= 0) ITEMS.splice(ix, 1);
+    removed.delete(id);
+    Object.keys(watched).forEach((k) => { if (k === String(id) || k.indexOf(id + ":") === 0) delete watched[k]; });
+    persistCustoms(); persistRemoved(); persist(); persistOrder();
+    rebuildUnits(); buildRows(); render();
+    return;
+  }
   const b = e.target.closest("[data-restore]");
   if (!b) return;
   removed.delete(Number(b.getAttribute("data-restore")));
@@ -506,7 +728,8 @@ document.getElementById("resetBtn").addEventListener("click", () => {
   removed = new Set();
   persist();
   persistRemoved();
-  render();
+  try { localStorage.removeItem(ORDER_KEY); localStorage.removeItem(CUSTOM_KEY); } catch (e) {}
+  location.reload();
 });
 
 buildList();
