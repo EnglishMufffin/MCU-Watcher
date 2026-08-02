@@ -38,7 +38,10 @@
   .gold { color: #f0b429; font-weight: 700; }
   .green { color: #7fd98f; }
   button { font-family: inherit; cursor: pointer; }
+  .headerBtns { display: flex; gap: 8px; }
   .ghostBtn { margin-top: 8px; width: 100%; background: transparent; color: #aeb3cf; border: 1px solid #3a3f63; border-radius: 6px; padding: 7px 12px; font-size: 13px; }
+  #lockBtn { flex: 0 0 auto; width: auto; padding: 7px 14px; }
+  #lockBtn.unlocked { color: #f0b429; border-color: #f0b429; }
   main { max-width: 760px; margin: 0 auto; padding: 16px 12px 0; }
   #logPanel { display: none; margin-bottom: 20px; padding: 12px 14px; border-radius: 8px; background: #171a2e; border: 1px solid #2b2f4d; }
   #logPanel h2 { font-size: 18px; letter-spacing: 0.05em; color: #f0b429; margin-bottom: 10px; }
@@ -49,6 +52,12 @@
   .dayBarFill.ok { background: linear-gradient(90deg, #3f7a4f, #7fd98f); }
   .dayTitles { font-size: 11px; color: #6c7194; margin-top: 2px; }
   ol, ul { list-style: none; }
+  .phaseHead {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    padding: 22px 6px 8px; border-bottom: 2px solid #e62429;
+  }
+  .phaseHead .pt { font-size: 17px; color: #f0b429; letter-spacing: 0.06em; }
+  .phaseHead .pc { font-size: 12px; color: #8b90b0; flex-shrink: 0; }
   .row { display: flex; align-items: center; gap: 12px; padding: 10px; border-bottom: 1px solid #232742; }
   li.done > .row { background: rgba(230,36,41,0.06); opacity: 0.55; }
   li.done > .row .title { text-decoration: line-through; text-decoration-color: #e62429; }
@@ -59,46 +68,32 @@
   .tag { font-weight: 700; letter-spacing: 0.06em; }
   .tag.Film { color: #f0b429; } .tag.TV { color: #7ea6e0; } .tag.Special { color: #c78bdb; }
   .expandBtn { background: transparent; border: none; color: #7ea6e0; font-size: 18px; padding: 6px 8px; flex-shrink: 0; }
-  .epList { display: none; background: #12152600; }
+  .removeBtn { background: transparent; border: none; color: #4c5178; font-size: 20px; line-height: 1; padding: 6px 8px; flex-shrink: 0; }
+  .removeBtn:hover { color: #e62429; }
+  .dragHandle { display: none; flex-shrink: 0; color: #4c5178; font-size: 18px; padding: 6px 4px; cursor: grab; touch-action: none; user-select: none; }
+  body.unlocked .dragHandle { display: block; }
+  body.unlocked .removeBtn { display: none; }
+  li.dragging { opacity: 0.9; }
+  li.dragging > .row { background: #232742; outline: 2px solid #f0b429; border-radius: 6px; }
+  .epList { display: none; }
   li.open > .epList { display: block; }
   .epRow { display: flex; align-items: center; gap: 10px; padding: 7px 10px 7px 48px; border-bottom: 1px solid #1c2038; font-size: 13px; cursor: pointer; }
   .epRow input { width: 17px; height: 17px; }
   .epRow.epDone { opacity: 0.55; }
   .epRow.epDone .epName { text-decoration: line-through; text-decoration-color: #e62429; }
   .epMeta { color: #8b90b0; font-size: 11px; margin-left: auto; text-align: right; }
-  .headerBtns { display: flex; gap: 8px; }
-  .headerBtns .ghostBtn { margin-top: 8px; }
-  #lockBtn { flex: 0 0 auto; width: auto; padding: 7px 14px; }
-  #lockBtn.unlocked { color: #f0b429; border-color: #f0b429; }
-  .dragHandle {
-    display: none; flex-shrink: 0; color: #4c5178; font-size: 18px;
-    padding: 6px 4px; cursor: grab; touch-action: none; user-select: none;
-  }
-  body.unlocked .dragHandle { display: block; }
-  body.unlocked .removeBtn { display: none; }
-  li.dragging { opacity: 0.9; }
-  li.dragging > .row { background: #232742; outline: 2px solid #f0b429; border-radius: 6px; }
-  .removeBtn {
-    background: transparent; border: none; color: #4c5178;
-    font-size: 20px; line-height: 1; padding: 6px 8px; flex-shrink: 0;
-  }
-  .removeBtn:hover { color: #e62429; }
-  #removedPanel { display: none; margin-top: 20px; padding: 12px 14px; border-radius: 8px; background: #171a2e; border: 1px solid #2b2f4d; }
-  #removedPanel h2 { font-size: 16px; letter-spacing: 0.05em; color: #8b90b0; margin-bottom: 8px; }
-  .removedRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1c2038; font-size: 13px; color: #8b90b0; }
-  .restoreBtn { background: transparent; color: #7ea6e0; border: 1px solid #3a3f63; border-radius: 5px; padding: 4px 10px; font-size: 12px; flex-shrink: 0; }
   #addPanel { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 8px; background: #171a2e; border: 1px solid #2b2f4d; }
   #addPanel label { display: block; font-size: 12px; color: #8b90b0; margin: 8px 0 3px; }
-  #addPanel input, #addPanel select {
-    width: 100%; padding: 8px 10px; border-radius: 6px;
-    background: #101322; border: 1px solid #3a3f63; color: #f5f2ea;
-    font-family: inherit; font-size: 14px;
-  }
+  #addPanel input, #addPanel select { width: 100%; padding: 8px 10px; border-radius: 6px; background: #101322; border: 1px solid #3a3f63; color: #f5f2ea; font-family: inherit; font-size: 14px; }
   .addBtns { display: flex; gap: 8px; margin-top: 12px; }
   .addBtns button { flex: 1; padding: 8px; border-radius: 6px; font-size: 13px; }
   #addSave { background: #e62429; border: none; color: #fff; font-weight: 700; }
   #addCancel { background: transparent; border: 1px solid #3a3f63; color: #8b90b0; }
   #addErr { color: #f08c8c; font-size: 12px; margin-top: 6px; display: none; }
+  #removedPanel { display: none; margin-top: 20px; padding: 12px 14px; border-radius: 8px; background: #171a2e; border: 1px solid #2b2f4d; }
+  #removedPanel h2 { font-size: 16px; letter-spacing: 0.05em; color: #8b90b0; margin-bottom: 8px; }
+  .removedRow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1c2038; font-size: 13px; color: #8b90b0; }
+  .restoreBtn { background: transparent; color: #7ea6e0; border: 1px solid #3a3f63; border-radius: 5px; padding: 4px 10px; font-size: 12px; flex-shrink: 0; }
   .resetWrap { text-align: center; margin-top: 28px; }
   .resetWrap button { background: transparent; color: #8b90b0; border: 1px solid #3a3f63; border-radius: 6px; padding: 8px 18px; font-size: 13px; }
   @media (prefers-reduced-motion: reduce) { #barFill { transition: none; } }
@@ -128,7 +123,7 @@
   <button class="ghostBtn" id="addToggle">＋ Add a film or show</button>
   <div id="addPanel">
     <label for="addTitle">Title</label>
-    <input id="addTitle" type="text" placeholder="e.g. Logan" maxlength="80">
+    <input id="addTitle" type="text" placeholder="e.g. Constantine" maxlength="80">
     <label for="addType">Type</label>
     <select id="addType">
       <option value="Film">Film</option>
@@ -136,7 +131,7 @@
       <option value="Special">Special</option>
     </select>
     <label for="addMins">Total runtime (minutes)</label>
-    <input id="addMins" type="number" min="1" max="6000" placeholder="e.g. 137">
+    <input id="addMins" type="number" min="1" max="6000" placeholder="e.g. 121">
     <div id="addEpsWrap" style="display:none">
       <label for="addEps">Number of episodes</label>
       <input id="addEps" type="number" min="1" max="60" placeholder="e.g. 8">
@@ -152,181 +147,291 @@
   <div class="resetWrap"><button id="resetBtn">Reset all progress</button></div>
 </main>
 <script>
-
 const ITEMS = [
-  { id: 1, title: "Eyes of Wakanda", type: "TV", mins: 105, epStart: 1, epEnd: 4 },
-  { id: 2, title: "Captain America: The First Avenger", type: "Film", mins: 124 },
-  { id: 3, title: "Agent Carter — Season 1", type: "TV", mins: 336, epStart: 1, epEnd: 8 },
-  { id: 4, title: "Agent Carter — Season 2", type: "TV", mins: 420, epStart: 1, epEnd: 10 },
-  { id: 5, title: "Captain Marvel", type: "Film", mins: 123 },
-  { id: 6, title: "Iron Man", type: "Film", mins: 126 },
-  { id: 7, title: "Iron Man 2", type: "Film", mins: 124 },
-  { id: 8, title: "The Incredible Hulk", type: "Film", mins: 112 },
-  { id: 9, title: "Thor", type: "Film", mins: 115 },
-  { id: 10, title: "The Avengers", type: "Film", mins: 143 },
-  { id: 11, title: "Agents of S.H.I.E.L.D. — S1, eps 1–7", type: "TV", mins: 301, epStart: 1, epEnd: 7 },
-  { id: 12, title: "Thor: The Dark World", type: "Film", mins: 112 },
-  { id: 13, title: "Agents of S.H.I.E.L.D. — S1, eps 8–16", type: "TV", mins: 387, epStart: 8, epEnd: 16 },
-  { id: 14, title: "Iron Man 3", type: "Film", mins: 130 },
-  { id: 15, title: "Captain America: The Winter Soldier", type: "Film", mins: 136 },
-  { id: 16, title: "Agents of S.H.I.E.L.D. — S1, eps 17–22", type: "TV", mins: 258, epStart: 17, epEnd: 22 },
-  { id: 17, title: "Guardians of the Galaxy", type: "Film", mins: 121 },
-  { id: 18, title: "Guardians of the Galaxy Vol. 2", type: "Film", mins: 136 },
-  { id: 19, title: "Daredevil — Season 1", type: "TV", mins: 711, epStart: 1, epEnd: 13 },
-  { id: 20, title: "Agents of S.H.I.E.L.D. — S2, eps 1–10", type: "TV", mins: 430, epStart: 1, epEnd: 10 },
-  { id: 21, title: "Jessica Jones — Season 1", type: "TV", mins: 676, epStart: 1, epEnd: 13 },
-  { id: 22, title: "Agents of S.H.I.E.L.D. — S2, eps 11–19", type: "TV", mins: 387, epStart: 11, epEnd: 19 },
-  { id: 23, title: "Avengers: Age of Ultron", type: "Film", mins: 141 },
-  { id: 24, title: "Agents of S.H.I.E.L.D. — S2, eps 20–22", type: "TV", mins: 129, epStart: 20, epEnd: 22 },
-  { id: 25, title: "Daredevil — S2, eps 1–4", type: "TV", mins: 218, epStart: 1, epEnd: 4 },
-  { id: 26, title: "Luke Cage — S1, eps 1–4", type: "TV", mins: 220, epStart: 1, epEnd: 4 },
-  { id: 27, title: "Daredevil — S2, eps 5–11", type: "TV", mins: 382, epStart: 5, epEnd: 11 },
-  { id: 28, title: "Luke Cage — S1, eps 5–8", type: "TV", mins: 220, epStart: 5, epEnd: 8 },
-  { id: 29, title: "Daredevil — S2, eps 12–13", type: "TV", mins: 109, epStart: 12, epEnd: 13 },
-  { id: 30, title: "Luke Cage — S1, eps 9–13", type: "TV", mins: 275, epStart: 9, epEnd: 13 },
-  { id: 31, title: "Ant-Man", type: "Film", mins: 117 },
-  { id: 32, title: "Agents of S.H.I.E.L.D. — S3, eps 1–10", type: "TV", mins: 430, epStart: 1, epEnd: 10 },
-  { id: 33, title: "Agents of S.H.I.E.L.D. — S3, eps 11–19", type: "TV", mins: 387, epStart: 11, epEnd: 19 },
-  { id: 34, title: "Iron Fist — Season 1", type: "TV", mins: 715, epStart: 1, epEnd: 13 },
-  { id: 35, title: "Captain America: Civil War", type: "Film", mins: 147 },
-  { id: 36, title: "Black Widow", type: "Film", mins: 134 },
-  { id: 37, title: "Agents of S.H.I.E.L.D. — S3, eps 20–22", type: "TV", mins: 129, epStart: 20, epEnd: 22 },
-  { id: 38, title: "The Defenders", type: "TV", mins: 384, epStart: 1, epEnd: 8 },
-  { id: 39, title: "Agents of S.H.I.E.L.D. — S4, eps 1–6", type: "TV", mins: 258, epStart: 1, epEnd: 6 },
-  { id: 40, title: "Doctor Strange", type: "Film", mins: 115 },
-  { id: 41, title: "Black Panther", type: "Film", mins: 134 },
-  { id: 42, title: "Agents of S.H.I.E.L.D. — S4, eps 7–8", type: "TV", mins: 86, epStart: 7, epEnd: 8 },
-  { id: 43, title: "Agents of S.H.I.E.L.D. — S4, eps 9–22", type: "TV", mins: 602, epStart: 9, epEnd: 22 },
-  { id: 44, title: "Spider-Man: Homecoming", type: "Film", mins: 133 },
-  { id: 46, title: "Inhumans", type: "TV", mins: 344, epStart: 1, epEnd: 8 },
-  { id: 47, title: "The Punisher — Season 1", type: "TV", mins: 715, epStart: 1, epEnd: 13 },
-  { id: 48, title: "Runaways — Season 1", type: "TV", mins: 450, epStart: 1, epEnd: 10 },
-  { id: 49, title: "Agents of S.H.I.E.L.D. — S5, eps 1–10", type: "TV", mins: 430, epStart: 1, epEnd: 10 },
-  { id: 50, title: "Jessica Jones — Season 2", type: "TV", mins: 689, epStart: 1, epEnd: 13 },
-  { id: 51, title: "Agents of S.H.I.E.L.D. — S5, eps 11–18", type: "TV", mins: 344, epStart: 11, epEnd: 18 },
-  { id: 52, title: "Cloak & Dagger — Season 1", type: "TV", mins: 420, epStart: 1, epEnd: 10 },
-  { id: 53, title: "Cloak & Dagger — Season 2", type: "TV", mins: 420, epStart: 1, epEnd: 10 },
-  { id: 54, title: "Luke Cage — Season 2", type: "TV", mins: 715, epStart: 1, epEnd: 13 },
-  { id: 55, title: "Iron Fist — Season 2", type: "TV", mins: 480, epStart: 1, epEnd: 10 },
-  { id: 56, title: "Daredevil — Season 3", type: "TV", mins: 663, epStart: 1, epEnd: 13 },
-  { id: 57, title: "Runaways — Season 2", type: "TV", mins: 585, epStart: 1, epEnd: 13 },
-  { id: 58, title: "The Punisher — Season 2", type: "TV", mins: 689, epStart: 1, epEnd: 13 },
-  { id: 59, title: "Jessica Jones — Season 3", type: "TV", mins: 676, epStart: 1, epEnd: 13 },
-  { id: 60, title: "Ant-Man and the Wasp", type: "Film", mins: 118 },
-  { id: 45, title: "Thor: Ragnarok", type: "Film", mins: 130 },
-  { id: 61, title: "Avengers: Infinity War", type: "Film", mins: 149 },
-  { id: 62, title: "Agents of S.H.I.E.L.D. — S5, eps 19–22", type: "TV", mins: 172, epStart: 19, epEnd: 22 },
-  { id: 63, title: "Agents of S.H.I.E.L.D. — Season 6", type: "TV", mins: 559, epStart: 1, epEnd: 13 },
-  { id: 64, title: "Agents of S.H.I.E.L.D. — Season 7", type: "TV", mins: 559, epStart: 1, epEnd: 13 },
-  { id: 65, title: "Runaways — Season 3", type: "TV", mins: 450, epStart: 1, epEnd: 10 },
-  { id: 66, title: "Avengers: Endgame", type: "Film", mins: 181 },
-  { id: 67, title: "Loki — Season 1", type: "TV", mins: 290, epStart: 1, epEnd: 6 },
-  { id: 68, title: "Loki — Season 2", type: "TV", mins: 290, epStart: 1, epEnd: 6 },
-  { id: 69, title: "Marvel Zombies", type: "TV", mins: 132, epStart: 1, epEnd: 4 },
-  { id: 70, title: "WandaVision", type: "TV", mins: 350, epStart: 1, epEnd: 9 },
-  { id: 101, title: "Deadpool", type: "Film", mins: 108 },
-  { id: 102, title: "Deadpool 2", type: "Film", mins: 119 },
-  { id: 71, title: "Deadpool & Wolverine", type: "Film", mins: 128 },
-  { id: 72, title: "Shang-Chi and the Legend of the Ten Rings", type: "Film", mins: 132 },
-  { id: 73, title: "The Falcon and the Winter Soldier", type: "TV", mins: 305, epStart: 1, epEnd: 6 },
-  { id: 74, title: "Eternals", type: "Film", mins: 156 },
-  { id: 75, title: "Spider-Man: Far From Home", type: "Film", mins: 129 },
-  { id: 76, title: "Spider-Man: No Way Home", type: "Film", mins: 148 },
-  { id: 77, title: "Doctor Strange in the Multiverse of Madness", type: "Film", mins: 126 },
-  { id: 78, title: "Hawkeye", type: "TV", mins: 285, epStart: 1, epEnd: 6 },
-  { id: 79, title: "Moon Knight", type: "TV", mins: 285, epStart: 1, epEnd: 6 },
-  { id: 80, title: "Black Panther: Wakanda Forever", type: "Film", mins: 161 },
-  { id: 81, title: "Echo", type: "TV", mins: 200, epStart: 1, epEnd: 5 },
-  { id: 82, title: "She-Hulk: Attorney at Law", type: "TV", mins: 290, epStart: 1, epEnd: 9 },
-  { id: 83, title: "Ms. Marvel", type: "TV", mins: 270, epStart: 1, epEnd: 6 },
-  { id: 84, title: "Thor: Love and Thunder", type: "Film", mins: 118 },
-  { id: 85, title: "Ironheart", type: "TV", mins: 270, epStart: 1, epEnd: 6 },
-  { id: 86, title: "Werewolf by Night", type: "Special", mins: 53 },
-  { id: 87, title: "The Guardians of the Galaxy Holiday Special", type: "Special", mins: 44 },
-  { id: 88, title: "Ant-Man and The Wasp: Quantumania", type: "Film", mins: 124 },
-  { id: 89, title: "Guardians of the Galaxy Vol. 3", type: "Film", mins: 150 },
-  { id: 90, title: "Secret Invasion", type: "TV", mins: 280, epStart: 1, epEnd: 6 },
-  { id: 91, title: "The Marvels", type: "Film", mins: 105 },
-  { id: 92, title: "Agatha All Along", type: "TV", mins: 340, epStart: 1, epEnd: 9 },
-  { id: 93, title: "Daredevil: Born Again — Season 1", type: "TV", mins: 426, epStart: 1, epEnd: 9 },
-  { id: 94, title: "Captain America: Brave New World", type: "Film", mins: 118 },
-  { id: 95, title: "Thunderbolts*", type: "Film", mins: 126 },
-  { id: 96, title: "The Fantastic Four: First Steps", type: "Film", mins: 115 },
-  { id: 97, title: "Wonder Man", type: "TV", mins: 248, epStart: 1, epEnd: 8 },
-  { id: 98, title: "Daredevil: Born Again — Season 2", type: "TV", mins: 389, epStart: 1, epEnd: 8 },
-  { id: 99, title: "The Punisher: One Last Kill", type: "Special", mins: 48 },
-  { id: 100, title: "Spider-Man: Brand New Day", type: "Film", mins: 145 },
+  { id: 1, title: "Captain America: The First Avenger", type: "Film", mins: 124, ph: 0 },
+  { id: 2, title: "Marvel One-Shot: Agent Carter", type: "Special", mins: 15, ph: 0 },
+  { id: 3, title: "Agent Carter (Season 1)", type: "TV", mins: 336, ph: 0, epStart: 1, epEnd: 8 },
+  { id: 4, title: "Agent Carter (Season 2)", type: "TV", mins: 420, ph: 0, epStart: 1, epEnd: 10 },
+  { id: 5, title: "X-Men: First Class", type: "Film", mins: 132, ph: 1 },
+  { id: 6, title: "Captain Marvel", type: "Film", mins: 123, ph: 2 },
+  { id: 7, title: "Blade", type: "Film", mins: 120, ph: 2 },
+  { id: 8, title: "Blade II", type: "Film", mins: 117, ph: 3 },
+  { id: 9, title: "Blade: Trinity", type: "Film", mins: 113, ph: 3 },
+  { id: 10, title: "X-Men Origins: Wolverine", type: "Film", mins: 107, ph: 3 },
+  { id: 11, title: "X-Men", type: "Film", mins: 104, ph: 3 },
+  { id: 12, title: "X2: X-Men United", type: "Film", mins: 134, ph: 3 },
+  { id: 13, title: "X-Men: The Last Stand", type: "Film", mins: 104, ph: 3 },
+  { id: 14, title: "The Wolverine", type: "Film", mins: 126, ph: 3 },
+  { id: 15, title: "Spider-Man", type: "Film", mins: 121, ph: 3 },
+  { id: 16, title: "Spider-Man 2", type: "Film", mins: 127, ph: 3 },
+  { id: 17, title: "Spider-Man 3", type: "Film", mins: 139, ph: 3 },
+  { id: 18, title: "The Amazing Spider-Man", type: "Film", mins: 136, ph: 3 },
+  { id: 19, title: "The Amazing Spider-Man 2", type: "Film", mins: 142, ph: 3 },
+  { id: 20, title: "Spider-Man: Into the Spider-Verse", type: "Film", mins: 117, ph: 4 },
+  { id: 21, title: "Spider-Man: Across the Spider-Verse", type: "Film", mins: 140, ph: 4 },
+  { id: 22, title: "Spider-Man: Beyond the Spider-Verse", type: "Film", mins: 140, ph: 4 },
+  { id: 23, title: "Spider-Noir (Season 1)", type: "TV", mins: 360, ph: 4, epStart: 1, epEnd: 8 },
+  { id: 24, title: "X-Men '97 (Season 1)", type: "TV", mins: 310, ph: 4, epStart: 1, epEnd: 10 },
+  { id: 25, title: "X-Men '97 (Season 2)", type: "TV", mins: 279, ph: 4, epStart: 1, epEnd: 9 },
+  { id: 26, title: "Ghost Rider", type: "Film", mins: 114, ph: 4 },
+  { id: 27, title: "Ghost Rider: Spirit of Vengeance", type: "Film", mins: 96, ph: 4 },
+  { id: 28, title: "Daredevil (2003)", type: "Film", mins: 103, ph: 4 },
+  { id: 29, title: "Elektra", type: "Film", mins: 97, ph: 4 },
+  { id: 30, title: "The Punisher (2004)", type: "Film", mins: 124, ph: 4 },
+  { id: 31, title: "Punisher: War Zone", type: "Film", mins: 103, ph: 4 },
+  { id: 32, title: "Man-Thing", type: "Film", mins: 97, ph: 4 },
+  { id: 33, title: "Fantastic Four (2005)", type: "Film", mins: 106, ph: 4 },
+  { id: 34, title: "Fantastic Four: Rise of the Silver Surfer", type: "Film", mins: 92, ph: 4 },
+  { id: 35, title: "Fantastic Four (2015)", type: "Film", mins: 100, ph: 4 },
+  { id: 36, title: "Hulk (2003)", type: "Film", mins: 138, ph: 4 },
+  { id: 37, title: "Iron Man", type: "Film", mins: 126, ph: 5 },
+  { id: 38, title: "The Incredible Hulk", type: "Film", mins: 112, ph: 5 },
+  { id: 39, title: "Iron Man 2", type: "Film", mins: 124, ph: 5 },
+  { id: 40, title: "A Funny Thing Happened on the Way to Thor's Hammer", type: "Special", mins: 4, ph: 5 },
+  { id: 41, title: "Iron Man 2 (Post-Credit Scene)", type: "Special", mins: 1, ph: 5 },
+  { id: 42, title: "Thor", type: "Film", mins: 115, ph: 5 },
+  { id: 43, title: "The Consultant", type: "Special", mins: 4, ph: 5 },
+  { id: 44, title: "Captain America: The First Avenger (Credits)", type: "Special", mins: 4, ph: 5 },
+  { id: 45, title: "Thor (Post-Credit Scene)", type: "Special", mins: 2, ph: 5 },
+  { id: 46, title: "The Avengers", type: "Film", mins: 143, ph: 5 },
+  { id: 47, title: "Item 47", type: "Special", mins: 12, ph: 5 },
+  { id: 48, title: "Agents of S.H.I.E.L.D. (Season 1)", type: "TV", mins: 946, ph: 6, epStart: 1, epEnd: 22 },
+  { id: 49, title: "Iron Man 3", type: "Film", mins: 130, ph: 6 },
+  { id: 50, title: "Thor: The Dark World", type: "Film", mins: 112, ph: 6 },
+  { id: 51, title: "All Hail the King", type: "Special", mins: 14, ph: 6 },
+  { id: 52, title: "Captain America: The Winter Soldier", type: "Film", mins: 136, ph: 6 },
+  { id: 53, title: "Guardians of the Galaxy", type: "Film", mins: 121, ph: 6 },
+  { id: 54, title: "Guardians of the Galaxy Vol. 2", type: "Film", mins: 136, ph: 6 },
+  { id: 55, title: "Agents of S.H.I.E.L.D. (Season 2)", type: "TV", mins: 946, ph: 6, epStart: 1, epEnd: 22 },
+  { id: 56, title: "Daredevil (Season 1)", type: "TV", mins: 711, ph: 7, epStart: 1, epEnd: 13 },
+  { id: 57, title: "Jessica Jones (Season 1)", type: "TV", mins: 676, ph: 7, epStart: 1, epEnd: 13 },
+  { id: 58, title: "Avengers: Age of Ultron", type: "Film", mins: 141, ph: 7 },
+  { id: 59, title: "WHiH Newsfront (Season 1)", type: "Special", mins: 15, ph: 7 },
+  { id: 60, title: "Ant-Man", type: "Film", mins: 117, ph: 7 },
+  { id: 61, title: "Agents of S.H.I.E.L.D. (Season 3)", type: "TV", mins: 946, ph: 8, epStart: 1, epEnd: 22 },
+  { id: 62, title: "Daredevil (Season 2)", type: "TV", mins: 709, ph: 8, epStart: 1, epEnd: 13 },
+  { id: 63, title: "WHiH Newsfront (Season 2)", type: "Special", mins: 15, ph: 8 },
+  { id: 64, title: "Captain America: Civil War", type: "Film", mins: 147, ph: 8 },
+  { id: 65, title: "Team Thor", type: "Special", mins: 5, ph: 8 },
+  { id: 66, title: "Team Thor: Part 2", type: "Special", mins: 5, ph: 8 },
+  { id: 67, title: "Luke Cage (Season 1)", type: "TV", mins: 715, ph: 8, epStart: 1, epEnd: 13 },
+  { id: 68, title: "Iron Fist (Season 1)", type: "TV", mins: 715, ph: 8, epStart: 1, epEnd: 13 },
+  { id: 69, title: "The Defenders (Season 1)", type: "TV", mins: 384, ph: 8, epStart: 1, epEnd: 8 },
+  { id: 70, title: "Black Widow", type: "Film", mins: 134, ph: 8 },
+  { id: 71, title: "Black Panther", type: "Film", mins: 134, ph: 8 },
+  { id: 72, title: "Eyes of Wakanda (Season 1)", type: "TV", mins: 105, ph: 8, epStart: 1, epEnd: 4 },
+  { id: 73, title: "Spider-Man: Homecoming", type: "Film", mins: 133, ph: 8 },
+  { id: 74, title: "The Punisher (Season 1)", type: "TV", mins: 715, ph: 8, epStart: 1, epEnd: 13 },
+  { id: 75, title: "Doctor Strange", type: "Film", mins: 115, ph: 8 },
+  { id: 76, title: "Cloak & Dagger (Season 1)", type: "TV", mins: 420, ph: 8, epStart: 1, epEnd: 10 },
+  { id: 77, title: "Agents of S.H.I.E.L.D. (Season 4)", type: "TV", mins: 946, ph: 8, epStart: 1, epEnd: 22 },
+  { id: 78, title: "Agents of S.H.I.E.L.D.: Slingshot", type: "Special", mins: 30, ph: 8 },
+  { id: 79, title: "Inhumans (Season 1)", type: "TV", mins: 344, ph: 8, epStart: 1, epEnd: 8 },
+  { id: 80, title: "Jessica Jones (Season 2)", type: "TV", mins: 689, ph: 8, epStart: 1, epEnd: 13 },
+  { id: 81, title: "X-Men: Days of Future Past", type: "Film", mins: 132, ph: 8 },
+  { id: 82, title: "X-Men: Apocalypse", type: "Film", mins: 144, ph: 8 },
+  { id: 83, title: "Dark Phoenix", type: "Film", mins: 114, ph: 8 },
+  { id: 84, title: "The New Mutants", type: "Film", mins: 94, ph: 8 },
+  { id: 85, title: "Legion (Season 1)", type: "TV", mins: 440, ph: 8, epStart: 1, epEnd: 8 },
+  { id: 86, title: "Legion (Season 2)", type: "TV", mins: 550, ph: 8, epStart: 1, epEnd: 11 },
+  { id: 87, title: "Legion (Season 3)", type: "TV", mins: 420, ph: 8, epStart: 1, epEnd: 8 },
+  { id: 88, title: "The Gifted (Season 1)", type: "TV", mins: 559, ph: 8, epStart: 1, epEnd: 13 },
+  { id: 89, title: "The Gifted (Season 2)", type: "TV", mins: 688, ph: 8, epStart: 1, epEnd: 16 },
+  { id: 90, title: "Luke Cage (Season 2)", type: "TV", mins: 715, ph: 8, epStart: 1, epEnd: 13 },
+  { id: 91, title: "Iron Fist (Season 2)", type: "TV", mins: 480, ph: 8, epStart: 1, epEnd: 10 },
+  { id: 92, title: "Daredevil (Season 3)", type: "TV", mins: 663, ph: 8, epStart: 1, epEnd: 13 },
+  { id: 93, title: "Cloak & Dagger (Season 2)", type: "TV", mins: 420, ph: 8, epStart: 1, epEnd: 10 },
+  { id: 94, title: "Deadpool", type: "Film", mins: 108, ph: 8 },
+  { id: 95, title: "Deadpool 2", type: "Film", mins: 119, ph: 8 },
+  { id: 96, title: "Agents of S.H.I.E.L.D. (Season 5)", type: "TV", mins: 946, ph: 9, epStart: 1, epEnd: 22 },
+  { id: 97, title: "Runaways (Season 1)", type: "TV", mins: 450, ph: 9, epStart: 1, epEnd: 10 },
+  { id: 98, title: "Runaways (Season 2)", type: "TV", mins: 585, ph: 9, epStart: 1, epEnd: 13 },
+  { id: 99, title: "Runaways (Season 3)", type: "TV", mins: 450, ph: 9, epStart: 1, epEnd: 10 },
+  { id: 100, title: "Thor: Ragnarok", type: "Film", mins: 130, ph: 9 },
+  { id: 101, title: "Team Darryl", type: "Special", mins: 6, ph: 9 },
+  { id: 102, title: "The Punisher (Season 2)", type: "TV", mins: 689, ph: 9, epStart: 1, epEnd: 13 },
+  { id: 103, title: "Jessica Jones (Season 3)", type: "TV", mins: 676, ph: 9, epStart: 1, epEnd: 13 },
+  { id: 104, title: "Venom", type: "Film", mins: 112, ph: 9 },
+  { id: 105, title: "Ant-Man and the Wasp", type: "Film", mins: 118, ph: 9 },
+  { id: 106, title: "Avengers: Infinity War", type: "Film", mins: 149, ph: 9 },
+  { id: 107, title: "Ant-Man & The Wasp (All Credits)", type: "Special", mins: 3, ph: 9 },
+  { id: 108, title: "Captain Marvel (Post-Credits Scene)", type: "Special", mins: 2, ph: 9 },
+  { id: 109, title: "Helstrom (Season 1)", type: "TV", mins: 470, ph: 9, epStart: 1, epEnd: 10 },
+  { id: 110, title: "Logan", type: "Film", mins: 137, ph: 10 },
+  { id: 111, title: "Avengers: Endgame", type: "Film", mins: 181, ph: 11 },
+  { id: 112, title: "WandaVision (Season 1)", type: "TV", mins: 350, ph: 11, epStart: 1, epEnd: 9 },
+  { id: 113, title: "WandaVision (Ep 9 Mid-Credit Scene)", type: "Special", mins: 1, ph: 11 },
+  { id: 114, title: "The Falcon and the Winter Soldier (Season 1)", type: "TV", mins: 305, ph: 11, epStart: 1, epEnd: 6 },
+  { id: 115, title: "Loki (Season 1)", type: "TV", mins: 290, ph: 11, epStart: 1, epEnd: 6 },
+  { id: 116, title: "What If...? (Season 1)", type: "TV", mins: 297, ph: 11, epStart: 1, epEnd: 9 },
+  { id: 117, title: "Agents of S.H.I.E.L.D. (Season 6)", type: "TV", mins: 559, ph: 11, epStart: 1, epEnd: 13 },
+  { id: 118, title: "Agents of S.H.I.E.L.D. (Season 7)", type: "TV", mins: 559, ph: 11, epStart: 1, epEnd: 13 },
+  { id: 119, title: "Peter's To-Do List", type: "Special", mins: 4, ph: 11 },
+  { id: 120, title: "Spider-Man: Far From Home", type: "Film", mins: 129, ph: 11 },
+  { id: 121, title: "Black Widow (Post-Credit Scene)", type: "Special", mins: 2, ph: 12 },
+  { id: 122, title: "Hawkeye (Season 1)", type: "TV", mins: 285, ph: 12, epStart: 1, epEnd: 6 },
+  { id: 123, title: "Eternals", type: "Film", mins: 156, ph: 12 },
+  { id: 124, title: "Shang-Chi and the Legend of the Ten Rings", type: "Film", mins: 132, ph: 12 },
+  { id: 125, title: "Venom: Let There Be Carnage", type: "Film", mins: 97, ph: 12 },
+  { id: 126, title: "Spider-Man: No Way Home", type: "Film", mins: 148, ph: 12 },
+  { id: 127, title: "Morbius", type: "Film", mins: 104, ph: 12 },
+  { id: 128, title: "The Daily Bugle (Season 1)", type: "Special", mins: 20, ph: 12 },
+  { id: 129, title: "The Daily Bugle (Season 2)", type: "Special", mins: 20, ph: 12 },
+  { id: 130, title: "Doctor Strange: Multiverse of Madness", type: "Film", mins: 126, ph: 12 },
+  { id: 131, title: "Moon Knight (Season 1)", type: "TV", mins: 285, ph: 12, epStart: 1, epEnd: 6 },
+  { id: 132, title: "Ms. Marvel (Season 1)", type: "TV", mins: 270, ph: 12, epStart: 1, epEnd: 6 },
+  { id: 133, title: "Thor: Love and Thunder", type: "Film", mins: 118, ph: 12 },
+  { id: 134, title: "Black Panther: Wakanda Forever", type: "Film", mins: 161, ph: 12 },
+  { id: 135, title: "She-Hulk (Season 1)", type: "TV", mins: 290, ph: 12, epStart: 1, epEnd: 9 },
+  { id: 136, title: "Echo (Season 1)", type: "TV", mins: 200, ph: 12, epStart: 1, epEnd: 5 },
+  { id: 137, title: "Ironheart (Season 1)", type: "TV", mins: 270, ph: 12, epStart: 1, epEnd: 6 },
+  { id: 138, title: "Werewolf by Night", type: "Special", mins: 53, ph: 12 },
+  { id: 139, title: "GOTG Holiday Special", type: "Special", mins: 44, ph: 12 },
+  { id: 140, title: "I Am Groot (Season 1)", type: "Special", mins: 15, ph: 12 },
+  { id: 141, title: "I Am Groot (Season 2)", type: "Special", mins: 15, ph: 12 },
+  { id: 142, title: "Ant-Man and the Wasp: Quantumania", type: "Film", mins: 124, ph: 12 },
+  { id: 143, title: "Guardians of the Galaxy Vol. 3", type: "Film", mins: 150, ph: 12 },
+  { id: 144, title: "Venom: The Last Dance", type: "Film", mins: 109, ph: 13 },
+  { id: 145, title: "Madame Web", type: "Film", mins: 116, ph: 13 },
+  { id: 146, title: "Kraven the Hunter", type: "Film", mins: 127, ph: 13 },
+  { id: 147, title: "Secret Invasion (Season 1)", type: "TV", mins: 280, ph: 13, epStart: 1, epEnd: 6 },
+  { id: 148, title: "The Marvels", type: "Film", mins: 105, ph: 13 },
+  { id: 149, title: "Marvel Zombies", type: "TV", mins: 132, ph: 13, epStart: 1, epEnd: 4 },
+  { id: 150, title: "Loki (Season 2)", type: "TV", mins: 290, ph: 13, epStart: 1, epEnd: 6 },
+  { id: 151, title: "What If...? (Season 2)", type: "TV", mins: 297, ph: 13, epStart: 1, epEnd: 9 },
+  { id: 152, title: "What If...? (Season 3)", type: "TV", mins: 264, ph: 13, epStart: 1, epEnd: 8 },
+  { id: 153, title: "Deadpool & Wolverine", type: "Film", mins: 128, ph: 13 },
+  { id: 154, title: "Agatha All Along (Season 1)", type: "TV", mins: 340, ph: 13, epStart: 1, epEnd: 9 },
+  { id: 155, title: "Your Friendly Neighborhood Spider-Man (Season 1)", type: "TV", mins: 250, ph: 13, epStart: 1, epEnd: 10 },
+  { id: 156, title: "Daredevil: Born Again (Season 1)", type: "TV", mins: 426, ph: 13, epStart: 1, epEnd: 9 },
+  { id: 157, title: "Captain America: Brave New World", type: "Film", mins: 118, ph: 13 },
+  { id: 158, title: "Thunderbolts*", type: "Film", mins: 126, ph: 13 },
+  { id: 159, title: "Wonder Man (Season 1)", type: "TV", mins: 248, ph: 14, epStart: 1, epEnd: 8 },
+  { id: 160, title: "Daredevil: Born Again (Season 2)", type: "TV", mins: 389, ph: 14, epStart: 1, epEnd: 8 },
+  { id: 161, title: "The Punisher: One Last Kill", type: "Special", mins: 48, ph: 14 },
+  { id: 162, title: "Spider-Man: Brand New Day", type: "Film", mins: 145, ph: 14 },
+  { id: 163, title: "VisionQuest (Season 1)", type: "TV", mins: 280, ph: 14, epStart: 1, epEnd: 8 },
+  { id: 164, title: "The Fantastic Four: First Steps", type: "Film", mins: 115, ph: 14 },
+  { id: 165, title: "Avengers: Doomsday", type: "Film", mins: 165, ph: 14 },
 ];
 
-const STORAGE_KEY = "mcu-marathon-eps-v2"; // { [key]: "YYYY-MM-DD" }, key = id or "id:ep"
-const LEGACY_KEY = "mcu-marathon-log-v1";  // { [id]: "YYYY-MM-DD" } from item-level version
+const PHASES = [
+  "Legacy: WWII & The 1940s",
+  "Legacy: 1960s",
+  "Legacy: 1990s",
+  "Legacy: 2000s",
+  "Legacy: Alternate Universes",
+  "Phase 1 — The Avengers Initiative (2008–2012)",
+  "Phase 2 — HYDRA & The Infinity Stones (2012–2015)",
+  "Phase 3A — Street Level Heroes (2015–2016)",
+  "Phase 3B — Civil War & Fallout (2016–2018)",
+  "Phase 3C — Ragnarok & The Infinity War (2018)",
+  "Legacy: Future (2029)",
+  "Phase 4 — The Blip & New Beginnings (2023)",
+  "Phase 4 — Multiverse Opens (2024–2025)",
+  "Phase 5 — The Multiverse War (2025–2026)",
+  "Phase 6 — Doomsday (2026)"
+];
+
+const WATCHED_KEY = "mcu-marathon-eps-v3";   // { key: "YYYY-MM-DD" }, key = "id" or "id:ep"
+const REMOVED_KEY = "mcu-marathon-removed-v2";
+const ORDER_KEY   = "mcu-marathon-order-v2"; // [[id, ph], ...]
+const CUSTOM_KEY  = "mcu-marathon-custom-v1";
 const DEADLINE = new Date(2026, 11, 18, 23, 59, 59);
 
-// Per-episode minutes: even split, last episode absorbs the remainder.
-function epCount(item) { return item.epStart ? (item.epEnd - item.epStart + 1) : 0; }
-function epMins(item, epNum) {
-  const n = epCount(item);
-  const base = Math.floor(item.mins / n);
-  return (epNum === item.epEnd) ? item.mins - base * (n - 1) : base;
-}
-function epKey(item, epNum) { return item.id + ":" + epNum; }
-function epLabel(item, epNum) { return "Ep " + epNum; }
-
-// Every tickable unit: films/specials = 1 unit; TV = 1 unit per episode.
-let UNITS = [];
-function rebuildUnits() {
-UNITS = [];
-ITEMS.forEach((item) => {
-  if (item.epStart) {
-    for (let e = item.epStart; e <= item.epEnd; e++) {
-      UNITS.push({ key: epKey(item, e), mins: epMins(item, e), itemId: item.id, logTitle: item.title + " · Ep " + e });
-    }
-  } else {
-    UNITS.push({ key: String(item.id), mins: item.mins, itemId: item.id, logTitle: item.title });
-  }
-});
-}
-rebuildUnits();
-
-const REMOVED_KEY = "mcu-marathon-removed-v1"; // array of removed item ids
-let removed = new Set();
-try {
-  const rawR = localStorage.getItem(REMOVED_KEY);
-  if (rawR) removed = new Set(JSON.parse(rawR));
-} catch (e) { removed = new Set(); }
-function persistRemoved() {
-  try { localStorage.setItem(REMOVED_KEY, JSON.stringify([...removed])); } catch (e) {}
-}
-let removedOpen = false;
+// old-list id -> new-list id (chunked AoS/DD/LC seasons collapse onto full seasons; ep numbers carry over)
+const MIGRATE = {1:72,2:1,3:3,4:4,5:6,6:37,7:39,8:38,9:42,10:46,11:48,13:48,16:48,12:50,14:49,15:52,17:53,18:54,19:56,20:55,22:55,24:55,21:57,23:58,25:62,27:62,29:62,26:67,28:67,30:67,31:60,32:61,33:61,37:61,34:68,35:64,36:70,38:69,39:77,42:77,43:77,40:75,41:71,44:73,45:100,46:79,47:74,48:97,49:96,51:96,62:96,50:80,52:76,53:93,54:90,55:91,56:92,57:98,58:102,59:103,60:105,61:106,63:117,64:118,65:99,66:111,67:115,68:150,69:149,70:112,71:153,72:124,73:114,74:123,75:120,76:126,77:130,78:122,79:131,80:134,81:136,82:135,83:132,84:133,85:137,86:138,87:139,88:142,89:143,90:147,91:148,92:154,93:156,94:157,95:158,96:164,97:159,98:160,99:161,100:162,101:94,102:95};
 
 let watched = {};
+let removed = new Set();
+let customs = [];
+
 (function load() {
+  try { const c = localStorage.getItem(CUSTOM_KEY); if (c) customs = JSON.parse(c) || []; } catch (e) {}
+  customs.forEach((c) => { if (c.ph === undefined) c.ph = 14; ITEMS.push(c); });
+
+  let haveNew = false;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { watched = JSON.parse(raw) || {}; return; }
+    const w = localStorage.getItem(WATCHED_KEY);
+    if (w) { watched = JSON.parse(w) || {}; haveNew = true; }
   } catch (e) {}
-  // migrate item-level ticks: mark every episode of a ticked season with the same date
+  if (!haveNew) {
+    // migrate ticks + dates from the old Digital Spy-order version
+    try {
+      const oldW = localStorage.getItem("mcu-marathon-eps-v2");
+      if (oldW) {
+        const o = JSON.parse(oldW) || {};
+        Object.keys(o).forEach((k) => {
+          const parts = k.split(":");
+          const oldId = Number(parts[0]);
+          const mapped = MIGRATE[oldId];
+          if (mapped !== undefined) {
+            watched[parts.length > 1 ? mapped + ":" + parts[1] : String(mapped)] = o[k];
+          } else if (oldId >= 1001) {
+            watched[k] = o[k]; // custom items keep their ids
+          }
+        });
+        persistWatched();
+      }
+    } catch (e) {}
+    try {
+      const oldR = localStorage.getItem("mcu-marathon-removed-v1");
+      if (oldR) {
+        (JSON.parse(oldR) || []).forEach((oldId) => {
+          const mapped = MIGRATE[oldId];
+          if (mapped !== undefined) removed.add(mapped);
+          else if (oldId >= 1001) removed.add(oldId);
+        });
+        persistRemoved();
+      }
+    } catch (e) {}
+  } else {
+    try { const r = localStorage.getItem(REMOVED_KEY); if (r) removed = new Set(JSON.parse(r)); } catch (e) {}
+  }
+
   try {
-    const raw = localStorage.getItem(LEGACY_KEY);
-    if (raw) {
-      const old = JSON.parse(raw) || {};
-      ITEMS.forEach((item) => {
-        const date = old[item.id];
-        if (!date) return;
-        if (item.epStart) {
-          for (let e = item.epStart; e <= item.epEnd; e++) watched[epKey(item, e)] = date;
-        } else {
-          watched[String(item.id)] = date;
-        }
+    const rawO = localStorage.getItem(ORDER_KEY);
+    if (rawO) {
+      const saved = JSON.parse(rawO); // [[id, ph], ...]
+      const pos = {}, phs = {};
+      saved.forEach((pair, i) => { pos[pair[0]] = i; phs[pair[0]] = pair[1]; });
+      ITEMS.sort((a, b) => {
+        const pa = (pos[a.id] !== undefined) ? pos[a.id] : ITEMS.indexOf(a) - 0.5;
+        const pb = (pos[b.id] !== undefined) ? pos[b.id] : ITEMS.indexOf(b) - 0.5;
+        return pa - pb;
       });
-      persist();
+      ITEMS.forEach((i) => { if (phs[i.id] !== undefined) i.ph = phs[i.id]; });
     }
   } catch (e) {}
 })();
 
-function persist() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(watched)); } catch (e) {}
+function persistWatched() { try { localStorage.setItem(WATCHED_KEY, JSON.stringify(watched)); } catch (e) {} }
+function persistRemoved() { try { localStorage.setItem(REMOVED_KEY, JSON.stringify([...removed])); } catch (e) {} }
+function persistOrder()   { try { localStorage.setItem(ORDER_KEY, JSON.stringify(ITEMS.map((i) => [i.id, i.ph]))); } catch (e) {} }
+function persistCustoms() { try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(customs)); } catch (e) {} }
+
+function epCount(item) { return item.epStart ? (item.epEnd - item.epStart + 1) : 0; }
+function epMins(item, ep) {
+  const n = epCount(item);
+  const base = Math.floor(item.mins / n);
+  return (ep === item.epEnd) ? item.mins - base * (n - 1) : base;
 }
+function epKey(item, ep) { return item.id + ":" + ep; }
+
+let UNITS = [];
+function rebuildUnits() {
+  UNITS = [];
+  ITEMS.forEach((item) => {
+    if (item.epStart) {
+      for (let e = item.epStart; e <= item.epEnd; e++) {
+        UNITS.push({ key: epKey(item, e), mins: epMins(item, e), itemId: item.id, logTitle: item.title + " · Ep " + e });
+      }
+    } else {
+      UNITS.push({ key: String(item.id), mins: item.mins, itemId: item.id, logTitle: item.title });
+    }
+  });
+}
+rebuildUnits();
 
 const fmtHours = (mins) => {
   const h = Math.floor(mins / 60);
@@ -342,133 +447,68 @@ const fmtDate = (key) => {
   return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 };
 
-const CUSTOM_KEY = "mcu-marathon-custom-v1"; // array of user-added items (ids >= 1001)
-let customs = [];
-try {
-  const rawC = localStorage.getItem(CUSTOM_KEY);
-  if (rawC) customs = JSON.parse(rawC) || [];
-} catch (e) { customs = []; }
-customs.forEach((c) => ITEMS.push(c));
-function persistCustoms() {
-  try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(customs)); } catch (e) {}
-}
-
-const ORDER_KEY = "mcu-marathon-order-v1"; // array of item ids, custom order
-try {
-  const rawO = localStorage.getItem(ORDER_KEY);
-  if (rawO) {
-    const saved = JSON.parse(rawO);
-    const pos = {};
-    saved.forEach((id, i) => { pos[id] = i; });
-    // items not in the saved order (newly added) keep their default neighbourhood
-    ITEMS.sort((a, b) => {
-      const pa = (pos[a.id] !== undefined) ? pos[a.id] : ITEMS.indexOf(a) - 0.5;
-      const pb = (pos[b.id] !== undefined) ? pos[b.id] : ITEMS.indexOf(b) - 0.5;
-      return pa - pb;
-    });
-  }
-} catch (e) {}
-function persistOrder() {
-  try { localStorage.setItem(ORDER_KEY, JSON.stringify(ITEMS.map((i) => i.id))); } catch (e) {}
-}
-let unlocked = false;
-
 const openItems = new Set();
 let logOpen = false;
+let removedOpen = false;
+let unlocked = false;
 
+function itemDoneEps(item) {
+  let c = 0;
+  for (let e = item.epStart; e <= item.epEnd; e++) if (watched[epKey(item, e)]) c++;
+  return c;
+}
 function itemDoneMins(item) {
   if (!item.epStart) return watched[item.id] ? item.mins : 0;
   let s = 0;
   for (let e = item.epStart; e <= item.epEnd; e++) if (watched[epKey(item, e)]) s += epMins(item, e);
   return s;
 }
-function itemDoneEps(item) {
-  let c = 0;
-  for (let e = item.epStart; e <= item.epEnd; e++) if (watched[epKey(item, e)]) c++;
-  return c;
+function itemComplete(item) {
+  return item.epStart ? itemDoneEps(item) === epCount(item) : !!watched[item.id];
 }
 
 function buildRows() {
   const ol = document.getElementById("list");
-  ol.innerHTML = ITEMS.map((item, idx) => {
+  let html = "";
+  let lastPh = -1;
+  let headN = 0;
+  ITEMS.forEach((item) => {
+    if (item.ph !== lastPh) {
+      headN++;
+      html += '<li class="phaseHead" data-ph="' + item.ph + '" id="phase-' + headN + '">' +
+              '<span class="pt display">' + (PHASES[item.ph] || "Custom") + '</span>' +
+              '<span class="pc"></span></li>';
+      lastPh = item.ph;
+    }
     let inner =
       '<div class="row">' +
-      '<span class="dragHandle" data-drag="' + item.id + '" aria-hidden="true">\u2261</span>' +
-      '<input type="checkbox" data-item="' + item.id + '" aria-label="Mark all of ' + item.title + '">' +
+      '<span class="dragHandle" data-drag="' + item.id + '" aria-hidden="true">≡</span>' +
+      '<input type="checkbox" data-item="' + item.id + '" aria-label="Mark all of ' + item.title.replace(/"/g, "") + '">' +
       '<span class="num display"></span>' +
       '<span style="flex:1;min-width:0" data-open="' + item.id + '">' +
-      '<span class="title">' + item.title + "</span>" +
+      '<span class="title">' + item.title + '</span>' +
       '<span class="meta"><span class="tag ' + item.type + '">' + item.type.toUpperCase() +
       '</span> · <span class="itemMeta"></span></span>' +
-      "</span>";
+      '</span>';
     if (item.epStart) {
       inner += '<button class="expandBtn" data-open="' + item.id + '" aria-label="Show episodes">▾</button>';
     }
-    inner += '<button class="removeBtn" data-remove="' + item.id + '" aria-label="Remove ' + item.title.replace(/"/g, '') + ' from marathon">\u00d7</button>';
-    inner += "</div>";
+    inner += '<button class="removeBtn" data-remove="' + item.id + '" aria-label="Remove from marathon">×</button>';
+    inner += '</div>';
     if (item.epStart) {
       let eps = "";
       for (let e = item.epStart; e <= item.epEnd; e++) {
-        eps +=
-          '<li><label class="epRow" id="ep-' + item.id + "-" + e + '">' +
+        eps += '<li><label class="epRow" id="ep-' + item.id + '-' + e + '">' +
           '<input type="checkbox" data-ep="' + epKey(item, e) + '">' +
-          '<span class="epName">' + epLabel(item, e) + "</span>" +
+          '<span class="epName">Ep ' + e + '</span>' +
           '<span class="epMeta"><span class="epTime">' + fmtHours(epMins(item, e)) + '</span><span class="epWhen green"></span></span>' +
-          "</label></li>";
+          '</label></li>';
       }
-      inner += '<ul class="epList">' + eps + "</ul>";
+      inner += '<ul class="epList">' + eps + '</ul>';
     }
-    return '<li id="item-' + item.id + '">' + inner + "</li>";
-  }).join("");
-}
-
-function buildList() {
-  const ol = document.getElementById("list");
-  buildRows();
-
-  ol.addEventListener("change", (e) => {
-    const epK = e.target.getAttribute("data-ep");
-    const itemId = e.target.getAttribute("data-item");
-    if (epK) {
-      if (watched[epK]) delete watched[epK];
-      else watched[epK] = todayKey();
-    } else if (itemId) {
-      const item = ITEMS.find((i) => String(i.id) === itemId);
-      if (item.epStart) {
-        const allDone = itemDoneEps(item) === epCount(item);
-        for (let ep = item.epStart; ep <= item.epEnd; ep++) {
-          const k = epKey(item, ep);
-          if (allDone) delete watched[k];
-          else if (!watched[k]) watched[k] = todayKey();
-        }
-      } else {
-        if (watched[itemId]) delete watched[itemId];
-        else watched[itemId] = todayKey();
-      }
-    } else return;
-    persist();
-    render();
+    html += '<li id="item-' + item.id + '" data-row="item">' + inner + '</li>';
   });
-
-  ol.addEventListener("click", (e) => {
-    const rm = e.target.closest("[data-remove]");
-    if (rm) {
-      e.preventDefault();
-      removed.add(Number(rm.getAttribute("data-remove")));
-      persistRemoved();
-      render();
-      return;
-    }
-    const t = e.target.closest("[data-open]");
-    if (!t) return;
-    if (e.target.tagName === "INPUT") return;
-    const id = Number(t.getAttribute("data-open"));
-    const item = ITEMS.find((i) => i.id === id);
-    if (!item || !item.epStart) return;
-    e.preventDefault();
-    if (openItems.has(id)) openItems.delete(id); else openItems.add(id);
-    render();
-  });
+  ol.innerHTML = html;
 }
 
 function render() {
@@ -509,9 +549,9 @@ function render() {
   } else {
     paceBox.className = "pace";
     paceBox.innerHTML =
-      '<span class="gold">' + fmtHours(perDayMins) + "/day</span> needed over the next <strong>" + daysLeft +
-      " days</strong> · today: <strong class=\"" + (todayMins >= perDayMins ? "green" : "") + "\">" +
-      fmtHours(todayMins) + "</strong>" + (todayMins >= perDayMins ? " ✓ on pace" : "");
+      '<span class="gold">' + fmtHours(perDayMins) + '/day</span> needed over the next <strong>' + daysLeft +
+      ' days</strong> · today: <strong class="' + (todayMins >= perDayMins ? 'green' : '') + '">' +
+      fmtHours(todayMins) + '</strong>' + (todayMins >= perDayMins ? ' ✓ on pace' : '');
   }
 
   document.getElementById("logToggle").textContent =
@@ -528,15 +568,16 @@ function render() {
       const shown = d.titles.length > 8
         ? d.titles.slice(0, 8).join(" · ") + " · +" + (d.titles.length - 8) + " more"
         : d.titles.join(" · ");
-      return '<div class="dayRow"><div class="dayHead"><strong>' + fmtDate(k) + "</strong><span" +
-        (ok ? ' class="green"' : "") + ">" + fmtHours(d.mins) + " · " + d.titles.length +
-        " tick" + (d.titles.length === 1 ? "" : "s") + "</span></div>" +
-        '<div class="dayBarOuter"><div class="dayBarFill' + (ok ? " ok" : "") + '" style="width:' +
+      return '<div class="dayRow"><div class="dayHead"><strong>' + fmtDate(k) + '</strong><span' +
+        (ok ? ' class="green"' : '') + '>' + fmtHours(d.mins) + ' · ' + d.titles.length +
+        ' tick' + (d.titles.length === 1 ? '' : 's') + '</span></div>' +
+        '<div class="dayBarOuter"><div class="dayBarFill' + (ok ? ' ok' : '') + '" style="width:' +
         (d.mins / maxDay) * 100 + '%"></div></div>' +
-        '<div class="dayTitles">' + shown + "</div></div>";
+        '<div class="dayTitles">' + shown + '</div></div>';
     }).join("");
   }
 
+  // removed panel
   const removedItems = ITEMS.filter((i) => removed.has(i.id));
   const removedToggle = document.getElementById("removedToggle");
   if (removedItems.length === 0) {
@@ -544,35 +585,49 @@ function render() {
     removedOpen = false;
   } else {
     removedToggle.style.display = "block";
-    removedToggle.textContent = (removedOpen ? "Hide removed \u25b2" : "Removed from marathon \u2014 " + removedItems.length + " \u25bc");
+    removedToggle.textContent = removedOpen ? "Hide removed ▲" : "Removed from marathon — " + removedItems.length + " ▼";
   }
   document.getElementById("removedPanel").style.display = removedOpen && removedItems.length ? "block" : "none";
   document.getElementById("removedBody").innerHTML = removedItems.map((i) =>
-    '<div class="removedRow"><span>' + i.title + " · " + fmtHours(i.mins) +
+    '<div class="removedRow"><span>' + i.title + ' · ' + fmtHours(i.mins) +
     '</span><span style="display:flex;gap:6px"><button class="restoreBtn" data-restore="' + i.id + '">Restore</button>' +
-    (i.id >= 1001 ? '<button class="restoreBtn" style="color:#f08c8c;border-color:#5a3a3a" data-delete-custom="' + i.id + '">Delete</button>' : "") +
-    "</span></div>"
+    (i.id >= 1001 ? '<button class="restoreBtn" style="color:#f08c8c;border-color:#5a3a3a" data-delete-custom="' + i.id + '">Delete</button>' : '') +
+    '</span></div>'
   ).join("");
 
-  // renumber visible rows in current DOM order
+  // renumber + per-item state + phase counts
+  const listEl = document.getElementById("list");
   let n = 0;
-  Array.from(document.getElementById("list").children).forEach((li) => {
+  let curHead = null, phDone = 0, phTotal = 0;
+  const flushHead = () => {
+    if (curHead) curHead.querySelector(".pc").textContent = phDone + " / " + phTotal + " titles";
+  };
+  Array.from(listEl.children).forEach((li) => {
+    if (li.classList.contains("phaseHead")) {
+      flushHead();
+      curHead = li; phDone = 0; phTotal = 0;
+      return;
+    }
     const id = Number(li.id.replace("item-", ""));
-    if (!removed.has(id)) { n++; li.querySelector(".num").textContent = n; }
-  });
-
-  ITEMS.forEach((item) => {
-    const li = document.getElementById("item-" + item.id);
-    li.style.display = removed.has(item.id) ? "none" : "";
+    const item = ITEMS.find((i) => i.id === id);
+    if (!item) return;
+    const isRemoved = removed.has(id);
+    li.style.display = isRemoved ? "none" : "";
+    if (!isRemoved) {
+      n++;
+      li.querySelector(".num").textContent = n;
+      phTotal++;
+      if (itemComplete(item)) phDone++;
+    }
     const master = li.querySelector('input[data-item]');
     const meta = li.querySelector(".itemMeta");
     if (item.epStart) {
-      const n = epCount(item);
-      const done = itemDoneEps(item);
-      master.checked = done === n;
-      master.indeterminate = done > 0 && done < n;
-      li.className = (done === n ? "done" : "") + (openItems.has(item.id) ? " open" : "");
-      meta.textContent = done + "/" + n + " eps · " + fmtHours(itemDoneMins(item)) + " of " + fmtHours(item.mins);
+      const cnt = epCount(item), done = itemDoneEps(item);
+      master.checked = done === cnt;
+      master.indeterminate = done > 0 && done < cnt;
+      li.classList.toggle("done", done === cnt);
+      li.classList.toggle("open", openItems.has(item.id));
+      meta.textContent = done + "/" + cnt + " eps · " + fmtHours(itemDoneMins(item)) + " of " + fmtHours(item.mins);
       for (let e = item.epStart; e <= item.epEnd; e++) {
         const row = document.getElementById("ep-" + item.id + "-" + e);
         const isDone = !!watched[epKey(item, e)];
@@ -583,14 +638,135 @@ function render() {
     } else {
       const isDone = !!watched[item.id];
       master.checked = isDone;
-      li.className = isDone ? "done" : "";
+      li.classList.toggle("done", isDone);
       meta.textContent = fmtHours(item.mins) + (isDone ? " · watched " + fmtDate(watched[item.id]) : "");
     }
   });
+  flushHead();
 }
 
-document.getElementById("logToggle").addEventListener("click", () => { logOpen = !logOpen; render(); });
-// ---- add custom films/shows ----
+function attachListeners() {
+  const ol = document.getElementById("list");
+
+  ol.addEventListener("change", (e) => {
+    const epK = e.target.getAttribute("data-ep");
+    const itemId = e.target.getAttribute("data-item");
+    if (epK) {
+      if (watched[epK]) delete watched[epK];
+      else watched[epK] = todayKey();
+    } else if (itemId) {
+      const item = ITEMS.find((i) => String(i.id) === itemId);
+      if (item.epStart) {
+        const allDone = itemDoneEps(item) === epCount(item);
+        for (let ep = item.epStart; ep <= item.epEnd; ep++) {
+          const k = epKey(item, ep);
+          if (allDone) delete watched[k];
+          else if (!watched[k]) watched[k] = todayKey();
+        }
+      } else {
+        if (watched[itemId]) delete watched[itemId];
+        else watched[itemId] = todayKey();
+      }
+    } else return;
+    persistWatched();
+    render();
+  });
+
+  ol.addEventListener("click", (e) => {
+    const rm = e.target.closest("[data-remove]");
+    if (rm) {
+      e.preventDefault();
+      removed.add(Number(rm.getAttribute("data-remove")));
+      persistRemoved();
+      render();
+      return;
+    }
+    const t = e.target.closest("[data-open]");
+    if (!t || e.target.tagName === "INPUT") return;
+    const id = Number(t.getAttribute("data-open"));
+    const item = ITEMS.find((i) => i.id === id);
+    if (!item || !item.epStart) return;
+    e.preventDefault();
+    if (openItems.has(id)) openItems.delete(id); else openItems.add(id);
+    render();
+  });
+
+  // drag to reorder
+  let dragLi = null;
+  let scrollTimer = null;
+  function autoScroll(y) {
+    const edge = 110;
+    let dy = 0;
+    if (y < edge) dy = -12;
+    else if (y > window.innerHeight - edge) dy = 12;
+    if (dy !== 0 && scrollTimer === null) scrollTimer = setInterval(() => window.scrollBy(0, dy), 16);
+    else if (dy === 0 && scrollTimer !== null) { clearInterval(scrollTimer); scrollTimer = null; }
+  }
+  ol.addEventListener("pointerdown", (e) => {
+    if (!unlocked) return;
+    const handle = e.target.closest(".dragHandle");
+    if (!handle) return;
+    e.preventDefault();
+    dragLi = handle.closest("li");
+    dragLi.classList.add("dragging");
+    handle.setPointerCapture(e.pointerId);
+  });
+  ol.addEventListener("pointermove", (e) => {
+    if (!dragLi) return;
+    e.preventDefault();
+    autoScroll(e.clientY);
+    const rows = Array.from(ol.children).filter(
+      (li) => li !== dragLi && li.style.display !== "none"
+    );
+    for (const sib of rows) {
+      const r = sib.getBoundingClientRect();
+      if (e.clientY < r.top + r.height / 2) {
+        if (sib.previousElementSibling !== dragLi) ol.insertBefore(dragLi, sib);
+        return;
+      }
+    }
+    if (ol.lastElementChild !== dragLi) ol.appendChild(dragLi);
+  });
+  function endDrag() {
+    if (!dragLi) return;
+    dragLi.classList.remove("dragging");
+    const draggedId = Number(dragLi.id.replace("item-", ""));
+    dragLi = null;
+    if (scrollTimer !== null) { clearInterval(scrollTimer); scrollTimer = null; }
+    // dragged item adopts the phase it now sits under
+    let curPh = ITEMS.length ? ITEMS[0].ph : 0;
+    const byId = {};
+    ITEMS.forEach((i) => { byId[i.id] = i; });
+    const newOrder = [];
+    Array.from(ol.children).forEach((li) => {
+      if (li.classList.contains("phaseHead")) { curPh = Number(li.getAttribute("data-ph")); return; }
+      const it = byId[Number(li.id.replace("item-", ""))];
+      if (!it) return;
+      if (it.id === draggedId) it.ph = curPh;
+      newOrder.push(it);
+    });
+    ITEMS.length = 0;
+    newOrder.forEach((i) => ITEMS.push(i));
+    persistOrder();
+    rebuildUnits();
+    buildRows();
+    render();
+  }
+  ol.addEventListener("pointerup", endDrag);
+  ol.addEventListener("pointercancel", endDrag);
+}
+
+// lock
+const lockBtn = document.getElementById("lockBtn");
+lockBtn.addEventListener("click", () => {
+  unlocked = !unlocked;
+  document.body.classList.toggle("unlocked", unlocked);
+  lockBtn.classList.toggle("unlocked", unlocked);
+  lockBtn.textContent = unlocked ? "🔓" : "🔒";
+  if (!unlocked) persistOrder();
+});
+
+// add custom
 const addPanel = document.getElementById("addPanel");
 document.getElementById("addToggle").addEventListener("click", () => {
   addPanel.style.display = addPanel.style.display === "block" ? "none" : "block";
@@ -605,102 +781,28 @@ document.getElementById("addSave").addEventListener("click", () => {
   const mins = parseInt(document.getElementById("addMins").value, 10);
   const eps = parseInt(document.getElementById("addEps").value, 10);
   const err = document.getElementById("addErr");
-  const fail = (msg) => { err.textContent = msg; err.style.display = "block"; };
+  const fail = (m) => { err.textContent = m; err.style.display = "block"; };
   err.style.display = "none";
   if (!title) return fail("Give it a title.");
   if (!mins || mins < 1) return fail("Enter the total runtime in minutes.");
   if (type === "TV" && (!eps || eps < 1)) return fail("Enter how many episodes it has.");
-  const safe = title.replace(/</g, "\u2039").replace(/>/g, "\u203a").replace(/"/g, "\u2033");
+  const safe = title.replace(/</g, "‹").replace(/>/g, "›").replace(/"/g, "″");
   const id = Math.max(1000, ...customs.map((c) => c.id)) + 1;
-  const item = { id: id, title: safe, type: type, mins: mins };
+  const item = { id: id, title: safe, type: type, mins: mins, ph: ITEMS.length ? ITEMS[ITEMS.length - 1].ph : 14 };
   if (type === "TV") { item.epStart = 1; item.epEnd = eps; }
   customs.push(item);
   ITEMS.push(item);
-  persistCustoms();
-  persistOrder();
-  rebuildUnits();
-  buildRows();
-  render();
+  persistCustoms(); persistOrder();
+  rebuildUnits(); buildRows(); render();
   document.getElementById("addTitle").value = "";
   document.getElementById("addMins").value = "";
   document.getElementById("addEps").value = "";
   addPanel.style.display = "none";
-  document.getElementById("item-" + id).scrollIntoView({ block: "center" });
+  const el = document.getElementById("item-" + id);
+  if (el) el.scrollIntoView({ block: "center" });
 });
 
-const lockBtn = document.getElementById("lockBtn");
-lockBtn.addEventListener("click", () => {
-  unlocked = !unlocked;
-  document.body.classList.toggle("unlocked", unlocked);
-  lockBtn.classList.toggle("unlocked", unlocked);
-  lockBtn.textContent = unlocked ? "🔓" : "🔒";
-  lockBtn.setAttribute("aria-label", unlocked ? "Lock the list order" : "Unlock to reorder the list");
-  if (!unlocked) { persistOrder(); }
-});
-
-// ---- drag to reorder (only via the ≡ handle, only when unlocked) ----
-(function enableDrag() {
-  const listEl = document.getElementById("list");
-  let dragLi = null;
-  let scrollTimer = null;
-
-  function autoScroll(y) {
-    const edge = 110;
-    let dy = 0;
-    if (y < edge) dy = -12;
-    else if (y > window.innerHeight - edge) dy = 12;
-    if (dy !== 0 && scrollTimer === null) {
-      scrollTimer = setInterval(() => window.scrollBy(0, dy), 16);
-    } else if (dy === 0 && scrollTimer !== null) {
-      clearInterval(scrollTimer); scrollTimer = null;
-    }
-  }
-
-  listEl.addEventListener("pointerdown", (e) => {
-    if (!unlocked) return;
-    const handle = e.target.closest(".dragHandle");
-    if (!handle) return;
-    e.preventDefault();
-    dragLi = handle.closest("li");
-    dragLi.classList.add("dragging");
-    handle.setPointerCapture(e.pointerId);
-  });
-
-  listEl.addEventListener("pointermove", (e) => {
-    if (!dragLi) return;
-    e.preventDefault();
-    autoScroll(e.clientY);
-    const siblings = Array.from(listEl.children).filter(
-      (li) => li !== dragLi && li.style.display !== "none"
-    );
-    for (const sib of siblings) {
-      const r = sib.getBoundingClientRect();
-      if (e.clientY < r.top + r.height / 2) {
-        if (sib.previousElementSibling !== dragLi) listEl.insertBefore(dragLi, sib);
-        return;
-      }
-    }
-    if (listEl.lastElementChild !== dragLi) listEl.appendChild(dragLi);
-  });
-
-  function endDrag() {
-    if (!dragLi) return;
-    dragLi.classList.remove("dragging");
-    dragLi = null;
-    if (scrollTimer !== null) { clearInterval(scrollTimer); scrollTimer = null; }
-    // rebuild ITEMS order from DOM, persist, re-render numbering
-    const byId = {};
-    ITEMS.forEach((i) => { byId[i.id] = i; });
-    const newOrder = Array.from(listEl.children).map((li) => byId[Number(li.id.replace("item-", ""))]);
-    ITEMS.length = 0;
-    newOrder.forEach((i) => ITEMS.push(i));
-    persistOrder();
-    render();
-  }
-  listEl.addEventListener("pointerup", endDrag);
-  listEl.addEventListener("pointercancel", endDrag);
-})();
-
+// removed panel
 document.getElementById("removedToggle").addEventListener("click", () => { removedOpen = !removedOpen; render(); });
 document.getElementById("removedPanel").addEventListener("click", (e) => {
   const del = e.target.closest("[data-delete-custom]");
@@ -712,7 +814,7 @@ document.getElementById("removedPanel").addEventListener("click", (e) => {
     if (ix >= 0) ITEMS.splice(ix, 1);
     removed.delete(id);
     Object.keys(watched).forEach((k) => { if (k === String(id) || k.indexOf(id + ":") === 0) delete watched[k]; });
-    persistCustoms(); persistRemoved(); persist(); persistOrder();
+    persistCustoms(); persistRemoved(); persistWatched(); persistOrder();
     rebuildUnits(); buildRows(); render();
     return;
   }
@@ -722,19 +824,22 @@ document.getElementById("removedPanel").addEventListener("click", (e) => {
   persistRemoved();
   render();
 });
+
+// log + reset
+document.getElementById("logToggle").addEventListener("click", () => { logOpen = !logOpen; render(); });
 document.getElementById("resetBtn").addEventListener("click", () => {
-  if (!confirm("Wipe all ticks and the watch log, and start from zero?")) return;
-  watched = {};
-  removed = new Set();
-  persist();
-  persistRemoved();
-  try { localStorage.removeItem(ORDER_KEY); localStorage.removeItem(CUSTOM_KEY); } catch (e) {}
+  if (!confirm("Wipe all ticks, dates, removals, custom entries and ordering, and start from zero?")) return;
+  try {
+    [WATCHED_KEY, REMOVED_KEY, ORDER_KEY, CUSTOM_KEY,
+     "mcu-marathon-eps-v2", "mcu-marathon-removed-v1", "mcu-marathon-order-v1", "mcu-marathon-log-v1"
+    ].forEach((k) => localStorage.removeItem(k));
+  } catch (e) {}
   location.reload();
 });
 
-buildList();
+buildRows();
+attachListeners();
 render();
-
 </script>
 </body>
 </html>
