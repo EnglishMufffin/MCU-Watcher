@@ -710,6 +710,7 @@ function attachListeners() {
   ol.addEventListener("click", (e) => {
     const dk = e.target.closest("[data-datekey]");
     if (dk) {
+      if (e.target.tagName === "INPUT") { e.stopPropagation(); return; } // let the native date picker open
       e.preventDefault();
       e.stopPropagation();
       openDateEditor(dk);
