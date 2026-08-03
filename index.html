@@ -86,6 +86,8 @@
   .epRow.epDone { opacity: 0.55; }
   .epRow.epDone .epName { text-decoration: line-through; text-decoration-color: #e62429; }
   .epMeta { color: #8b90b0; font-size: 11px; margin-left: auto; text-align: right; }
+  .when { text-decoration: underline dotted; cursor: pointer; }
+  .when input[type="date"] { background: #101322; border: 1px solid #3a3f63; color: #f5f2ea; border-radius: 4px; font-size: 12px; padding: 2px 4px; font-family: inherit; }
   #addPanel { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 8px; background: #171a2e; border: 1px solid #2b2f4d; }
   #addPanel label { display: block; font-size: 12px; color: #8b90b0; margin: 8px 0 3px; }
   #addPanel input, #addPanel select { width: 100%; padding: 8px 10px; border-radius: 6px; background: #101322; border: 1px solid #3a3f63; color: #f5f2ea; font-family: inherit; font-size: 14px; }
@@ -639,13 +641,17 @@ function render() {
         const isDone = !!watched[epKey(item, e)];
         row.className = "epRow" + (isDone ? " epDone" : "");
         row.querySelector("input").checked = isDone;
-        row.querySelector(".epWhen").textContent = isDone ? " · " + fmtDate(watched[epKey(item, e)]) : "";
+        row.querySelector(".epWhen").innerHTML = isDone
+          ? ' · <span class="when" data-datekey="' + epKey(item, e) + '">' + fmtDate(watched[epKey(item, e)]) + ' ✎</span>'
+          : "";
       }
     } else {
       const isDone = !!watched[item.id];
       master.checked = isDone;
       li.classList.toggle("done", isDone);
-      meta.textContent = fmtHours(item.mins) + (isDone ? " · watched " + fmtDate(watched[item.id]) : "");
+      meta.innerHTML = fmtHours(item.mins) + (isDone
+        ? ' · <span class="when green" data-datekey="' + item.id + '">watched ' + fmtDate(watched[item.id]) + ' ✎</span>'
+        : "");
     }
   });
   flushHead();
@@ -678,7 +684,37 @@ function attachListeners() {
     render();
   });
 
+  function openDateEditor(span) {
+    if (span.querySelector("input")) return;
+    const key = span.getAttribute("data-datekey");
+    const cur = watched[key] || todayKey();
+    span.innerHTML = "";
+    const inp = document.createElement("input");
+    inp.type = "date";
+    inp.value = cur;
+    inp.max = todayKey();
+    span.appendChild(inp);
+    inp.focus();
+    let saved = false;
+    inp.addEventListener("change", () => {
+      if (inp.value && inp.value <= todayKey()) {
+        watched[key] = inp.value;
+        persistWatched();
+      }
+      saved = true;
+      render();
+    });
+    inp.addEventListener("blur", () => { if (!saved) render(); });
+  }
+
   ol.addEventListener("click", (e) => {
+    const dk = e.target.closest("[data-datekey]");
+    if (dk) {
+      e.preventDefault();
+      e.stopPropagation();
+      openDateEditor(dk);
+      return;
+    }
     const rm = e.target.closest("[data-remove]");
     if (rm) {
       e.preventDefault();
